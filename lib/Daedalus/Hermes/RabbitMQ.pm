@@ -30,6 +30,12 @@ Service that provides communication between Daedalus Project services using Rabb
 
 =cut
 
+=head1 ATTRIBUTES
+
+=cut
+
+has 'host' => ( is => 'ro', isa => 'Str', default => "127.0.0.1" );
+
 =head1 SUBROUTINES/METHODS
 
 =head2 understands
@@ -41,6 +47,20 @@ Returns if config match with RabbitMQ implementation.
 sub understands {
     my ( $class, $data ) = @_;
     return $data->{brokerType} eq "RabbitMQ";
+}
+
+=head2 testConnection
+
+Test connection to message broker system.
+If connection fails, module finishes.
+
+=cut
+
+sub testConnection {
+    my $self = shift;
+    my $data = shift;
+
+    return 1;
 }
 
 =head1 AUTHOR

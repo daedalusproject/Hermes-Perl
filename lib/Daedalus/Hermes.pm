@@ -35,6 +35,12 @@ Service that provides communication between Daedalus Project services. Perl impl
     ...
 =cut
 
+=head1 FACTORY
+
+This module implements a factory of different objects depending on the message broker we want to use
+
+=cut
+
 my $finder = Module::PluginFinder->new(
     search_path => 'Daedalus::Hermes',
     filter      => sub {
@@ -45,6 +51,15 @@ my $finder = Module::PluginFinder->new(
 );
 
 =head1 SUBROUTINES/METHODS
+
+=head2 BUILD
+
+=cut
+
+sub BUILD {
+    my $self = shift;
+    $self->testConnection();
+}
 
 =head2 call
 
