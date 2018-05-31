@@ -1,22 +1,18 @@
-package Daedalus::Hermes;
+package Daedalus::Hermes::RabbitMQ;
 
 use 5.006;
 use strict;
 use warnings;
 
-use Carp qw(croak);
-
-use Module::PluginFinder;
 use Moose;
-use Moose::Role;
 use Moose::Util::TypeConstraints;
 use namespace::autoclean;
 
-use Data::Dumper;
+with 'Hermes';
 
 =head1 NAME
 
-Daedalus::Hermes - The great new Daedalus::Hermes!
+Daedalus::Hermes::RabbitMQ - Hermes RabbitMQ implementation.
 
 =head1 VERSION
 
@@ -28,42 +24,24 @@ our $VERSION = '0.01';
 
 =head1 SYNOPSIS
 
-Service that provides communication between Daedalus Project services. Perl implementation.
+Service that provides communication between Daedalus Project services using RabbitMQ as message broker.
 
-    use Daedalus::Hermes;
+    use Daedalus::Hermes::RabbitMQ;
 
-    my $foo = Daedalus::Hermes->new();
-    ...
 =cut
-
-my $finder = Module::PluginFinder->new(
-    search_path => 'Daedalus::Hermes',
-    filter      => sub {
-        my ( $class, $data ) = @_;
-        $class->understands($data);
-      }
-
-);
 
 =head1 SUBROUTINES/METHODS
 
-=head2 new_instance
+=head2 understands
 
-Returns an Hermes instance depending of which configuration is provided.
+Returns if config match with RabbitMQ implementation.
 
 =cut
 
-sub new {
-    my ( $self, $data ) = @_;
-    if ( !( exists $data->{'brokerType'} ) ) {
-        croak "Failed to instance Hermes. No brokerType found.";
-    }
-
-    return $finder->construct($data)
-      or croak "Cannot instance Hermes with this configuration.";
-
-    #            return $finder->construct($data);
-
+sub understands {
+    die("HEY");
+    my ( $class, $data ) = @_;
+    return $data->{brokerType} eq "RabbitMQ";
 }
 
 =head1 AUTHOR
@@ -155,4 +133,4 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =cut
 
-1;    # End of Daedalus::Hermes
+1;    # End of Daedalus::Hermes::RabbitMQ
