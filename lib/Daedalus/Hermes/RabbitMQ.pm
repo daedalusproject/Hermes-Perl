@@ -5,10 +5,10 @@ use strict;
 use warnings;
 
 use Moose;
-use Moose::Util::TypeConstraints;
-use namespace::autoclean;
 
-with 'Hermes';
+extends 'Daedalus::Hermes';
+
+use namespace::autoclean;
 
 =head1 NAME
 
@@ -39,7 +39,6 @@ Returns if config match with RabbitMQ implementation.
 =cut
 
 sub understands {
-    die("HEY");
     my ( $class, $data ) = @_;
     return $data->{brokerType} eq "RabbitMQ";
 }
@@ -133,4 +132,5 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =cut
 
+__PACKAGE__->meta->make_immutable;
 1;    # End of Daedalus::Hermes::RabbitMQ

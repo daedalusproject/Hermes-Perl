@@ -8,7 +8,6 @@ use Carp qw(croak);
 
 use Module::PluginFinder;
 use Moose;
-use Moose::Role;
 use Moose::Util::TypeConstraints;
 use namespace::autoclean;
 
@@ -47,22 +46,20 @@ my $finder = Module::PluginFinder->new(
 
 =head1 SUBROUTINES/METHODS
 
-=head2 new_instance
+=head2 call
 
-Returns an Hermes instance depending of which configuration is provided.
+Calls Hermes, the emissary and messenger of the gods... Well, not really.
+Instance an Hermes subclass depending of which configuration is provided.
 
 =cut
 
-sub new {
+sub call {
     my ( $self, $data ) = @_;
     if ( !( exists $data->{'brokerType'} ) ) {
         croak "Failed to instance Hermes. No brokerType found.";
     }
 
-    return $finder->construct($data)
-      or croak "Cannot instance Hermes with this configuration.";
-
-    #            return $finder->construct($data);
+    return $finder->construct($data);
 
 }
 
@@ -155,4 +152,5 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =cut
 
+__PACKAGE__->meta->make_immutable;
 1;    # End of Daedalus::Hermes
