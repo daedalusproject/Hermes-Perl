@@ -41,22 +41,43 @@ has 'host' =>
   ( is => 'ro', isa => 'Str', default => "127.0.0.1", required => 1 );
 has 'user'     => ( is => 'ro', isa => 'Str', required => 1 );
 has 'password' => ( is => 'ro', isa => 'Str', required => 1 );
+has 'port'     => ( is => 'ro', isa => 'Int', default  => 5672, required => 1 );
 
 =head1 SUBROUTINES/METHODS
-
-=head1 testConnection
-
-Tests connection attributes against
-
 =cut
 
 sub BUILD {
-    _testConnection();
+    my $self = shift;
+
+    my $mq = Net::AMQP::RabbitMQ->new;
+
+    $self->_testConnection($mq);
 }
 
+=head1 testConnection
+
+Tests connection attributes against RabbitMQ server.
+
+=cut
+
 sub _testConnection {
+    my $self = shift;
+    my $mq   = shift;
+
+    $mq->connect( 'localhost', { user => 'guest', password => 'guest' } );
+    $mq->disconnect;
     return 1;
 }
+
+=head1 _connect
+
+Connect against RabbitMQ server.
+
+=cut
+
+#sub _connect {
+#
+#}
 
 =head1 AUTHOR
 
