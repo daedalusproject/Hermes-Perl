@@ -6,7 +6,7 @@ use warnings;
 
 use Carp qw(croak);
 
-use Module::PluginFinder;
+use base qw( Class::Factory  );
 use Moose;
 use Moose::Util::TypeConstraints;
 use namespace::autoclean;
@@ -29,54 +29,29 @@ our $VERSION = '0.01';
 
 Service that provides communication between Daedalus Project services. Perl implementation.
 
-    use Daedalus::Hermes;
+=head1 SUBROUTINES/METHODS
 
-    my $foo = Daedalus::Hermes->new();
-    ...
+=head1 testConnection
+
+Tests connection attributes against
+
 =cut
+
+sub testConnection { die "Define testConnection() in implementation" }
 
 =head1 FACTORY
 
-This module implements a factory of different objects depending on the message broker we want to use
+Hermes is a factory.
 
 =cut
 
-my $finder = Module::PluginFinder->new(
-    search_path => 'Daedalus::Hermes',
-    filter      => sub {
-        my ( $class, $data ) = @_;
-        $class->understands($data);
-      }
+=head2 Daedalus::Hermes::RabbitMQ
 
-);
-
-=head1 SUBROUTINES/METHODS
-
-=head2 BUILD
+Daedalus::Hermes::RabbitMQ - rabbitmq driver
 
 =cut
 
-sub BUILD {
-    my $self = shift;
-    $self->testConnection();
-}
-
-=head2 call
-
-Calls Hermes, the emissary and messenger of the gods... Well, not really.
-Instance an Hermes subclass depending of which configuration is provided.
-
-=cut
-
-sub call {
-    my ( $self, $data ) = @_;
-    if ( !( exists $data->{'brokerType'} ) ) {
-        croak "Failed to instance Hermes. No brokerType found.";
-    }
-
-    return $finder->construct($data);
-
-}
+__PACKAGE__->add_factory_type( rabbitmq => 'Daedalus::Hermes::RabbitMQ' );
 
 =head1 AUTHOR
 
@@ -87,9 +62,6 @@ sub call {
 Please report any bugs or feature requests to C<bug-daedalus-hermes at rt.cpan.org>, or through
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Daedalus-Hermes>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
-
-
-
 
 =head1 SUPPORT
 
@@ -164,8 +136,6 @@ CONTRIBUTOR WILL BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR
 CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THE PACKAGE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 =cut
 
-__PACKAGE__->meta->make_immutable;
 1;    # End of Daedalus::Hermes

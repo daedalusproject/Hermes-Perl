@@ -2,19 +2,26 @@
 use 5.006;
 use strict;
 use warnings;
-use Test::More tests => 2;
+use Test::More tests => 4;
 use Test::Exception;
 
 BEGIN {
     use_ok('Daedalus::Hermes') || print "Bail out!\n";
 }
 
-my $data = {};
+my $HERMES = Daedalus::Hermes->new('rabbitmq');
 
-$data->{brokerType} = 'RabbitMQ';
+throws_ok { $HERMES->new(); }
+qr/\(password\) is required at constructor/,
+"Creating and Daedalus::Hermes::RabbitMQ instance without user or password should fail.";
 
-my $hermes = Daedalus::Hermes->call($data);
+throws_ok { $HERMES->new( { password => 'guest' } ); }
+qr/\(user\) is required at constructor/,
+  "Creating and Daedalus::Hermes::RabbitMQ instance without user should fail.";
 
-ok( $hermes->testConnection() );
+ok(
+    $HERMES->new( { user => 'guest', password => 'guest' } ),
+    "Daedalus::Hermes::RabbitMQ can be instanced."
+);
 
 diag("Testing Daedalus::Hermes $Daedalus::Hermes::VERSION, Perl $], $^X");

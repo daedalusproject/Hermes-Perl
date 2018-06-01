@@ -9,10 +9,8 @@ BEGIN {
     use_ok('Daedalus::Hermes') || print "Bail out!\n";
 }
 
-my $data = {};
-
-throws_ok { Daedalus::Hermes->call($data) }
-qr/Failed to instance Hermes. No brokerType found./,
-  "Creating and Hermes instance without BrokerTyoe attribute should fail.";
+throws_ok { Daedalus::Hermes->new() }
+qr/is not defined in 'Daedalus::Hermes'/,
+  "Creating an Hermes instance without valid factory date.";
 
 diag("Testing Daedalus::Hermes $Daedalus::Hermes::VERSION, Perl $], $^X");

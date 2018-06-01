@@ -6,8 +6,11 @@ use warnings;
 
 use Moose;
 
-extends 'Daedalus::Hermes';
+use base qw( Daedalus::Hermes );
 
+use Moose;
+use Net::AMQP::RabbitMQ;
+use MooseX::StrictConstructor;
 use namespace::autoclean;
 
 =head1 NAME
@@ -34,32 +37,24 @@ Service that provides communication between Daedalus Project services using Rabb
 
 =cut
 
-has 'host' => ( is => 'ro', isa => 'Str', default => "127.0.0.1" );
+has 'host' =>
+  ( is => 'ro', isa => 'Str', default => "127.0.0.1", required => 1 );
+has 'user'     => ( is => 'ro', isa => 'Str', required => 1 );
+has 'password' => ( is => 'ro', isa => 'Str', required => 1 );
 
 =head1 SUBROUTINES/METHODS
 
-=head2 understands
+=head1 testConnection
 
-Returns if config match with RabbitMQ implementation.
+Tests connection attributes against
 
 =cut
 
-sub understands {
-    my ( $class, $data ) = @_;
-    return $data->{brokerType} eq "RabbitMQ";
+sub BUILD {
+    _testConnection();
 }
 
-=head2 testConnection
-
-Test connection to message broker system.
-If connection fails, module finishes.
-
-=cut
-
-sub testConnection {
-    my $self = shift;
-    my $data = shift;
-
+sub _testConnection {
     return 1;
 }
 
@@ -72,9 +67,6 @@ sub testConnection {
 Please report any bugs or feature requests to C<bug-daedalus-hermes at rt.cpan.org>, or through
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Daedalus-Hermes>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
-
-
-
 
 =head1 SUPPORT
 
