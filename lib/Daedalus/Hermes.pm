@@ -52,6 +52,7 @@ Daedalus::Hermes::RabbitMQ - rabbitmq driver
 =cut
 
 __PACKAGE__->add_factory_type( rabbitmq => 'Daedalus::Hermes::RabbitMQ' );
+__PACKAGE__->add_factory_type( hermes   => 'Daedalus::Hermes' );
 
 =head1 AUTHOR
 
