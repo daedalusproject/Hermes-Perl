@@ -3,6 +3,7 @@ requires 'Moose';
 requires 'MooseX::NonMoose';
 requires 'Module::PluginFinder';
 requires 'Net::AMQP::RabbitMQ';
+requires 'Class::Factory';
 
 
 recommends 'Pod::Usage';
