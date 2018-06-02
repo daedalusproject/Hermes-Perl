@@ -64,7 +64,14 @@ sub _testConnection {
     my $self = shift;
     my $mq   = shift;
 
-    $mq->connect( 'localhost', { user => 'guest', password => 'guest' } );
+    $mq->connect(
+        $self->host,
+        {
+            user     => $self->user,
+            password => $self->password,
+            port     => $self->port
+        }
+    );
     $mq->disconnect;
     return 1;
 }

@@ -20,7 +20,14 @@ qr/\(user\) is required at constructor/,
   "Creating and Daedalus::Hermes::RabbitMQ instance without user should fail.";
 
 ok(
-    $HERMES->new( { user => 'guest', password => 'guest' } ),
+    $HERMES->new(
+        {
+            host     => 'localhost',
+            user     => 'guest',
+            password => 'guest',
+            port     => 5673
+        }
+    ),
     "Daedalus::Hermes::RabbitMQ can be instanced."
 );
 
