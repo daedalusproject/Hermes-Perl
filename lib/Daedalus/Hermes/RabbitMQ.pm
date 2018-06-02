@@ -42,6 +42,12 @@ has 'host' =>
 has 'user'     => ( is => 'ro', isa => 'Str', required => 1 );
 has 'password' => ( is => 'ro', isa => 'Str', required => 1 );
 has 'port'     => ( is => 'ro', isa => 'Int', default  => 5672, required => 1 );
+has 'vhost'    => ( is => 'ro', isa => 'Str', default  => "/", required => 1 );
+has 'channel_max' => ( is => 'ro', isa => 'Int', default => 0, required => 1 );
+has 'frame_max' =>
+  ( is => 'ro', isa => 'Int', default => 131072, required => 1 );
+has 'heartbeat' => ( is => 'ro', isa => 'Int', default => 0, required => 1 );
+has 'timeout' => ( is => 'ro', isa => 'Int' );
 
 =head1 SUBROUTINES/METHODS
 =cut
@@ -67,9 +73,13 @@ sub _testConnection {
     $mq->connect(
         $self->host,
         {
-            user     => $self->user,
-            password => $self->password,
-            port     => $self->port
+            user        => $self->user,
+            password    => $self->password,
+            port        => $self->port,
+            vhost       => $self->vhost,
+            channel_max => $self->channel_max,
+            heartbeat   => $self->heartbeat,
+            timeout     => $self->timeout,
         }
     );
     $mq->disconnect;
