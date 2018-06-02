@@ -5,6 +5,15 @@ perl:
     - '5.22'
     - '5.20'
 
+sudo: required
+
+services:
+    - docker
+
+before_install:
+    - docker pull rabbitmq:3.7.5
+    - docker run -d --hostname raabitmq --name rabbitmq -p 15672:15672 -p 4369:4369 -p 5671:5671 -p 5672:5672 rabbitmq:3.7.5
+
 script: perl Makefile.PL && make && make test
 after_success:
     - cover -test

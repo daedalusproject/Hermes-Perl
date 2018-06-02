@@ -25,7 +25,7 @@ ok(
             host     => 'localhost',
             user     => 'guest',
             password => 'guest',
-            port     => 5673
+            port     => 5672
         }
     ),
     "Daedalus::Hermes::RabbitMQ can be instanced."
