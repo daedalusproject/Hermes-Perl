@@ -90,9 +90,7 @@ sub BUILD {
 
     if ( $queue_ok == 1 ) {
 
-        my $mq = Net::AMQP::RabbitMQ->new;
-
-        $self->_testConnection($mq);
+        $self->_testConnection();
 
     }
     else {
@@ -100,7 +98,7 @@ sub BUILD {
     }
 }
 
-=head1 testConnection
+=head1 _testConnection
 
 Tests connection attributes against RabbitMQ server.
 
@@ -108,9 +106,24 @@ Tests connection attributes against RabbitMQ server.
 
 sub _testConnection {
     my $self = shift;
-    my $mq   = shift;
+
+    my $mq = $self->_connect();
+    $self->_disconnect($mq);
+    return 1;
+}
+
+=head1 _connect
+
+Connect against RabbitMQ server.
+
+=cut
+
+sub _connect {
+    my $self = shift;
+    my $mq   = Net::AMQP::RabbitMQ->new;
 
     $mq->connect(
+
         $self->host,
         {
             user        => $self->user,
@@ -121,20 +134,87 @@ sub _testConnection {
             heartbeat   => $self->heartbeat,
             timeout     => $self->timeout,
         }
+
     );
-    $mq->disconnect;
-    return 1;
+
+    return $mq;
+
 }
 
-=head1 _connect
+=head1 _disconnect
 
-Connect against RabbitMQ server.
+Closes RabbitMQ connection.
 
 =cut
 
-#sub _connect {
-#
-#}
+sub _disconnect {
+    my $self = shift;
+    my $mq   = shift;
+
+    $mq->disconnect;
+
+    return 1;
+}
+
+=head1 _validateMessageData
+
+Validates message Data.
+
+=cut
+
+sub _validateMessageData {
+
+    my $self         = shift;
+    my $message_data = shift;
+
+    my $is_valid = 0;
+
+    if ($message_data) {
+        if (   exists( $message_data->{queue} )
+            && exists( $message_data->{message} ) )
+        {
+            if ( !( exists( $self->queues->{ $message_data->{queue} } ) ) ) {
+                croak
+"Queue $message_data->{queue} is not defined in Daedalus::Hermes::RabbitMQ configuration, cannot send any message.";
+            }
+        }
+        else {
+            croak
+"There are is no defined queue or message, cannot send any message.";
+        }
+    }
+    else {
+        croak "There are is no defined data for sending any message.";
+    }
+
+    return $is_valid;
+}
+
+=head1 send
+
+Send a message through a RabbitMQ connection.
+
+=cut
+
+sub send {
+
+    my $self      = shift;
+    my $send_data = shift;
+
+    $self->_validateMessageData($send_data);
+
+    my $channel = $self->queues->{ $send_data->{queue} }->{channel};
+    my $purpose = $self->queues->{ $send_data->{queue} }->{purpose};
+
+    my $mq = $self->_connect();
+
+    $mq->channel_open($channel);
+    $mq->queue_declare( $channel, $purpose );
+    $mq->publish( $channel, $purpose, $send_data->{message} );
+
+    $self->_disconnect($mq);
+
+}
 
 =head1 AUTHOR
 
