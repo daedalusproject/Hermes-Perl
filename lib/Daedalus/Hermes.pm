@@ -83,13 +83,27 @@ sub BUILD {
 
 }
 
-=head1 testConnection
+=head1 _testConnection
 
 Tests connection attributes against
 
 =cut
 
-sub testConnection { die "Define testConnection() in implementation" }
+sub _testConnection { die "Define _testConnection() in implementation" }
+
+=head1 _raiseException
+
+Croaks an error message
+Write a log in the near future.
+
+=cut
+
+sub _raiseException {
+    my $self          = shift;
+    my $error_message = shift;
+
+    croak $error_message;
+}
 
 =head1 FACTORY
 

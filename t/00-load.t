@@ -13,8 +13,8 @@ throws_ok { Daedalus::Hermes->new() }
 qr/is not defined in 'Daedalus::Hermes'/,
   "Creating an Hermes instance without valid factory date.";
 
-throws_ok { Daedalus::Hermes->new('hermes')->testConnection() }
-qr/Define testConnection\(\)/,
+throws_ok { Daedalus::Hermes->new('hermes')->_testConnection() }
+qr/Define _testConnection\(\)/,
   "testConnection is not defined in parent class.";
 
 diag("Testing Daedalus::Hermes $Daedalus::Hermes::VERSION, Perl $], $^X");

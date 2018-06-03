@@ -4,7 +4,6 @@ use 5.006;
 use strict;
 use warnings;
 
-use Carp qw(croak);
 use Moose;
 
 use base qw( Daedalus::Hermes );
@@ -94,7 +93,7 @@ sub BUILD {
 
     }
     else {
-        croak "$error_message";
+        $self->_raiseException($error_message);
     }
 }
 
@@ -172,17 +171,20 @@ sub _validateMessageData {
             && exists( $message_data->{message} ) )
         {
             if ( !( exists( $self->queues->{ $message_data->{queue} } ) ) ) {
-                croak
-"Queue $message_data->{queue} is not defined in Daedalus::Hermes::RabbitMQ configuration, cannot send any message.";
+                $self->_raiseException(
+"Queue $message_data->{queue} is not defined in Daedalus::Hermes::RabbitMQ configuration, cannot send any message."
+                );
             }
         }
         else {
-            croak
-"There are is no defined queue or message, cannot send any message.";
+            $self->_raiseException(
+"There are is no defined queue or message, cannot send any message."
+            );
         }
     }
     else {
-        croak "There are is no defined data for sending any message.";
+        $self->_raiseException(
+            "There are is no defined data for sending any message.");
     }
 }
 
@@ -200,16 +202,17 @@ sub _validateQueue {
     if ($data) {
         if ( exists( $data->{queue} ) ) {
             if ( !( exists( $self->queues->{ $data->{queue} } ) ) ) {
-                croak
-"Queue $data->{queue} is not defined in Daedalus::Hermes::RabbitMQ configuration, cannot connect.";
+                $self->_raiseException(
+"Queue $data->{queue} is not defined in Daedalus::Hermes::RabbitMQ configuration, cannot connect."
+                );
             }
         }
         else {
-            croak "There are is no defined queue.";
+            $self->_raiseException("There are is no defined queue.");
         }
     }
     else {
-        croak "There are is no defined data to connect.";
+        $self->_raiseException("There are is no defined data to connect.");
     }
 }
 
