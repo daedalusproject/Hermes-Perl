@@ -11,7 +11,7 @@ BEGIN {
 
 my $HERMES = Daedalus::Hermes->new('rabbitmq');
 
-my $hemes = $HERMES->new(
+my $hermes = $HERMES->new(
     {
         host     => 'localhost',
         user     => 'guest',
@@ -21,6 +21,24 @@ my $hemes = $HERMES->new(
             testqueue => { purpose => "test_queue", channel => 1 },
         }
     }
+);
+
+throws_ok {
+    $hermes->send();
+}
+qr/There are is no defined channel/, "A queue is required to send a message.";
+
+throws_ok {
+    $hermes->send( { queue => "testqueue" } );
+}
+
+qr/There are is no defined message/,
+  "Of course, to send a message you need something to send";
+
+ok(
+    $hermes->send(
+        { queue => "testqueue", message => "Ground Control to Major Tom." }
+    )
 );
 
 diag("Testing Daedalus::Hermes $Daedalus::Hermes::VERSION, Perl $], $^X");
