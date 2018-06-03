@@ -2,7 +2,7 @@
 use 5.006;
 use strict;
 use warnings;
-use Test::More tests => 9;
+use Test::More tests => 11;
 use Test::Exception;
 
 BEGIN {
@@ -58,7 +58,8 @@ throws_ok {
         }
     );
 }
-qr/has no purpose defined/, "Hermes::Perl constructor shows all found errors.";
+qr/has no purpose defined/,
+  "Daedalus::Hermes::Perl constructor shows all found errors.";
 
 throws_ok {
     $HERMES->new(
@@ -71,19 +72,39 @@ throws_ok {
     );
 }
 qr/testqueue2 has no purpose defined/,
-  "Hermes::Perl constructor checks all queues.";
+  "Daedalus::Hermes::Perl constructor checks all queues.";
 
-#throws_ok {
-#    $HERMES->new(
-#        {
-#            host     => 'localhost',
-#            user     => 'guest',
-#            password => 'guest',
-#            port     => 5672
-#        }
-#    );
-#}
-#qr/\(queues\) is required at constructor/,
-#"Creating and Daedalus::Hermes::RabbitMQ instance without queues declaration should fail.";
+throws_ok {
+    $HERMES->new(
+        {
+            host     => 'localhost',
+            user     => 'guest',
+            password => 'guest',
+            port     => 5672,
+            queues   => {
+                testqueue  => { purpose => "test_queue" },
+                testqueue2 => { purpose => "other_test_queue" }
+            }
+        }
+    );
+}
+qr/A channel number is required for/,
+  "Daedalus::Hermes::RabbitMQ requires channels.";
+
+throws_ok {
+    $HERMES->new(
+        {
+            host     => 'localhost',
+            user     => 'guest',
+            password => 'guest',
+            port     => 5672,
+            queues   => {
+                testqueue  => { purpose => "test_queue",       channel => -1 },
+                testqueue2 => { purpose => "other_test_queue", channel => 1 }
+            }
+        }
+    );
+}
+qr/Channel must be positive number in/, "Channels has to be positive integers.";
 
 diag("Testing Daedalus::Hermes $Daedalus::Hermes::VERSION, Perl $], $^X");

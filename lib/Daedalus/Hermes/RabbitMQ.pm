@@ -4,6 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
+use Carp qw(croak);
 use Moose;
 
 use base qw( Daedalus::Hermes );
@@ -57,9 +58,36 @@ sub BUILD {
 
     my $self = $class->SUPER::BUILD();
 
-    my $mq = Net::AMQP::RabbitMQ->new;
+    my $queue_ok = 1;
 
-    $self->_testConnection($mq);
+    # Queue has to use a channel and channel numbers can't be repeated
+    my @used_channels;
+    my $error_message = "";
+
+    for my $queue ( keys %{ $self->queues } ) {
+        if ( exists( $self->queues->{$queue}->{channel} ) ) {
+            my $channel = $self->queues->{$queue}->{channel};
+            if ( $channel < 1 ) {
+                $queue_ok = 0;
+                $error_message .= "Channel must be positive number in $queue. ";
+            }
+        }
+        else {
+            $queue_ok = 0;
+            $error_message .= "A channel number is required for $queue. ";
+        }
+    }
+
+    if ( $queue_ok == 1 ) {
+
+        my $mq = Net::AMQP::RabbitMQ->new;
+
+        $self->_testConnection($mq);
+
+    }
+    else {
+        croak "$error_message";
+    }
 }
 
 =head1 testConnection
