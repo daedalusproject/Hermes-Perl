@@ -5,7 +5,7 @@ requires 'MooseX::StrictConstructor';
 requires 'Module::PluginFinder';
 requires 'Net::AMQP::RabbitMQ';
 requires 'Class::Factory';
-
+requires 'String::Random';
 
 recommends 'Pod::Usage';
 
