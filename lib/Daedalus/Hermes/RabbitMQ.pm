@@ -173,14 +173,10 @@ sub _validateMessageData {
         if (   exists( $message_data->{queue} )
             && exists( $message_data->{message} ) )
         {
-
-            if ( exists( $self->queues->{ $message_data->{queue} } ) ) {
-                $is_valid = 1;
+            if ( !( exists( $self->queues->{ $message_data->{queue} } ) ) ) {
+                croak
+"Queue $message_data->{queue} is not defined in Daedalus::Hermes::RabbitMQ configuration, cannot send any message.";
             }
-            else {
-                $is_valid = 0;
-            }
-
         }
         else {
             croak

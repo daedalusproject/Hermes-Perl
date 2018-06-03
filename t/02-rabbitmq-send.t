@@ -2,7 +2,7 @@
 use 5.006;
 use strict;
 use warnings;
-use Test::More tests => 4;
+use Test::More tests => 5;
 use Test::Exception;
 
 BEGIN {
@@ -35,6 +35,14 @@ throws_ok {
 
 qr/There are is no defined queue or message, cannot send any message./,
   "Of course, to send a message you need something to send";
+
+throws_ok {
+    $hermes->send(
+        { queue => "nonexistentqueue", message => "Not senging this" } );
+}
+
+qr/Queue nonexistentqueue is not defined in Daedalus::Hermes::RabbitMQ configuration, cannot send any message./,
+  "Selected queue has to be definned in Hermes instance.";
 
 ok(
     $hermes->send(
