@@ -19,7 +19,7 @@ throws_ok { $HERMES->new( { password => 'guest' } ); }
 qr/\(user\) is required at constructor/,
   "Creating and Daedalus::Hermes::RabbitMQ instance without user should fail.";
 
-ok(
+throws_ok {
     $HERMES->new(
         {
             host     => 'localhost',
@@ -27,8 +27,9 @@ ok(
             password => 'guest',
             port     => 5672
         }
-    ),
-    "Daedalus::Hermes::RabbitMQ can be instanced."
-);
+    );
+}
+qr/\(queues\) is required at constructor/,
+"Creating and Daedalus::Hermes::RabbitMQ instance without queues declaration should fail.";
 
 diag("Testing Daedalus::Hermes $Daedalus::Hermes::VERSION, Perl $], $^X");
