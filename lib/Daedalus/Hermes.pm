@@ -75,7 +75,7 @@ sub BUILD {
 
     }
 
-    croak "$error_message" if ( $queue_ok == 0 );
+    die "$error_message" if ( $queue_ok == 0 );
 
 }
 
