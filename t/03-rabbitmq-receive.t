@@ -5,6 +5,8 @@ use warnings;
 use Test::More tests => 3;
 use Test::Exception;
 
+use String::Random;
+
 BEGIN {
     use_ok('Daedalus::Hermes') || print "Bail out!\n";
 }
@@ -25,7 +27,12 @@ my $hermes = $HERMES->new(
     }
 );
 
-$hermes->send( { queue => "testqueue", message => $message } );
+my $random_string = new String::Random;
+my $random        = $random_string->randpattern( 's' x 32 );
+
+my $unique_message = "$message - $random";
+
+$hermes->send( { queue => "testqueue", message => $unique_message } );
 
 throws_ok {
     $hermes->receive();
@@ -33,6 +40,6 @@ throws_ok {
 qr/There are is no defined data to connect./,
   "A queue is required to receive a message.";
 
-ok( $hermes->receive( { queue => "testqueue" } ) eq $message );
+ok( $hermes->receive( { queue => "testqueue" } ) eq $unique_message );
 
 diag("Testing Daedalus::Hermes $Daedalus::Hermes::VERSION, Perl $], $^X");
