@@ -27,18 +27,18 @@ my $hermes = $HERMES->new(
     }
 );
 
+throws_ok {
+    $hermes->receive();
+}
+qr/There are is no defined data to connect./,
+  "A queue is required to receive a message.";
+
 my $random_string = new String::Random;
 my $random        = $random_string->randpattern( 's' x 32 );
 
 my $unique_message = "$message - $random";
 
 $hermes->send( { queue => "testqueue", message => $unique_message } );
-
-throws_ok {
-    $hermes->receive();
-}
-qr/There are is no defined data to connect./,
-  "A queue is required to receive a message.";
 
 ok( $hermes->receive( { queue => "testqueue" } ) eq $unique_message );
 
