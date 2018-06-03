@@ -4,6 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
+use Carp qw(croak);
 use Moose;
 
 use base qw( Daedalus::Hermes );
@@ -41,22 +42,99 @@ has 'host' =>
   ( is => 'ro', isa => 'Str', default => "127.0.0.1", required => 1 );
 has 'user'     => ( is => 'ro', isa => 'Str', required => 1 );
 has 'password' => ( is => 'ro', isa => 'Str', required => 1 );
+has 'port'     => ( is => 'ro', isa => 'Int', default  => 5672, required => 1 );
+has 'vhost'    => ( is => 'ro', isa => 'Str', default  => "/", required => 1 );
+has 'channel_max' => ( is => 'ro', isa => 'Int', default => 0, required => 1 );
+has 'frame_max' =>
+  ( is => 'ro', isa => 'Int', default => 131072, required => 1 );
+has 'heartbeat' => ( is => 'ro', isa => 'Int', default => 0, required => 1 );
+has 'timeout' => ( is => 'ro', isa => 'Int' );
 
 =head1 SUBROUTINES/METHODS
-
-=head1 testConnection
-
-Tests connection attributes against
-
 =cut
 
 sub BUILD {
-    _testConnection();
+    my $class = shift;
+
+    my $self = $class->SUPER::BUILD();
+
+    my $queue_ok = 1;
+
+    # Queue has to use a channel and channel numbers can't be repeated
+    my @used_channels;
+    my $error_message = "";
+
+    for my $queue ( keys %{ $self->queues } ) {
+        if ( exists( $self->queues->{$queue}->{channel} ) ) {
+            my $channel = $self->queues->{$queue}->{channel};
+            if ( $channel < 1 ) {
+                $queue_ok = 0;
+                $error_message .= "Channel must be positive number in $queue. ";
+            }
+            else {
+                if ( grep( /^$channel$/, @used_channels ) ) {
+                    $queue_ok = 0;
+                    $error_message .=
+                      "There are one or more queues sharing channel $channel";
+                }
+                else {
+                    push @used_channels, $channel;
+                }
+            }
+        }
+        else {
+            $queue_ok = 0;
+            $error_message .= "A channel number is required for $queue. ";
+        }
+    }
+
+    if ( $queue_ok == 1 ) {
+
+        my $mq = Net::AMQP::RabbitMQ->new;
+
+        $self->_testConnection($mq);
+
+    }
+    else {
+        croak "$error_message";
+    }
 }
 
+=head1 testConnection
+
+Tests connection attributes against RabbitMQ server.
+
+=cut
+
 sub _testConnection {
+    my $self = shift;
+    my $mq   = shift;
+
+    $mq->connect(
+        $self->host,
+        {
+            user        => $self->user,
+            password    => $self->password,
+            port        => $self->port,
+            vhost       => $self->vhost,
+            channel_max => $self->channel_max,
+            heartbeat   => $self->heartbeat,
+            timeout     => $self->timeout,
+        }
+    );
+    $mq->disconnect;
     return 1;
 }
+
+=head1 _connect
+
+Connect against RabbitMQ server.
+
+=cut
+
+#sub _connect {
+#
+#}
 
 =head1 AUTHOR
 

@@ -29,7 +29,59 @@ our $VERSION = '0.01';
 
 Service that provides communication between Daedalus Project services. Perl implementation.
 
+=head1 ATTRIBUTES
+
+=cut
+
+has 'queues' => ( is => 'ro', isa => 'HashRef', required => 1 );
+
 =head1 SUBROUTINES/METHODS
+
+=head1 BUILD
+
+Verifies queues
+
+=cut
+
+sub BUILD {
+
+    my $self = shift;
+
+    my $queue_ok      = 1;
+    my $error_message = "";
+    my @queue_keys    = keys %{ $self->queues };
+
+    if ( @queue_keys == 0 ) {
+        $queue_ok      = 0;
+        $error_message = "There is no defined queues.";
+    }
+
+    # Verify queues
+
+    if ( $queue_ok == 1 ) {
+        for my $queue ( keys %{ $self->queues } ) {
+            if ( exists $self->queues->{$queue}->{'purpose'} ) {
+                if ( $self->queues->{$queue}->{'purpose'} =~ / / ) {
+                    $error_message .=
+                      "$queue purpose is not allowed to contain spaces. ";
+                    $queue_ok = 0;
+                }
+            }
+            else {
+                $error_message .= "$queue has no purpose defined. ";
+                $queue_ok = 0;
+            }
+        }
+
+    }
+
+    if ( $queue_ok == 0 ) {
+        die "$error_message";
+    }
+
+    return $self;
+
+}
 
 =head1 testConnection
 
