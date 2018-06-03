@@ -2,7 +2,7 @@
 use 5.006;
 use strict;
 use warnings;
-use Test::More tests => 2;
+use Test::More tests => 3;
 use Test::Exception;
 
 BEGIN {
@@ -30,7 +30,7 @@ $hermes->send( { queue => "testqueue", message => $message } );
 throws_ok {
     $hermes->receive();
 }
-qr/There are is no defined data for sending any message./,
+qr/There are is no defined data to connect./,
   "A queue is required to receive a message.";
 
 ok( $hermes->receive( { queue => "testqueue" } ) eq $message );

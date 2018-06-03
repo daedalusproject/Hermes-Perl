@@ -167,8 +167,6 @@ sub _validateMessageData {
     my $self         = shift;
     my $message_data = shift;
 
-    my $is_valid = 0;
-
     if ($message_data) {
         if (   exists( $message_data->{queue} )
             && exists( $message_data->{message} ) )
@@ -186,8 +184,33 @@ sub _validateMessageData {
     else {
         croak "There are is no defined data for sending any message.";
     }
+}
 
-    return $is_valid;
+=head1 _validateQueue
+
+Validates Queue existence.
+
+=cut
+
+sub _validateQueue {
+
+    my $self = shift;
+    my $data = shift;
+
+    if ($data) {
+        if ( exists( $data->{queue} ) ) {
+            if ( !( exists( $self->queues->{ $data->{queue} } ) ) ) {
+                croak
+"Queue $data->{queue} is not defined in Daedalus::Hermes::RabbitMQ configuration, cannot connect.";
+            }
+        }
+        else {
+            croak "There are is no defined queue.";
+        }
+    }
+    else {
+        croak "There are is no defined data to connect.";
+    }
 }
 
 =head1 send
@@ -214,6 +237,35 @@ sub send {
 
     $self->_disconnect($mq);
 
+}
+
+=head1 receive
+
+Receive a message from a RabbitMQ connection.
+
+=cut
+
+sub receive {
+
+    my $self       = shift;
+    my $queue_data = shift;
+
+    $self->_validateQueue($queue_data);
+
+    my $channel = $self->queues->{ $queue_data->{queue} }->{channel};
+    my $purpose = $self->queues->{ $queue_data->{queue} }->{purpose};
+
+    my $mq = $self->_connect();
+
+    $mq->channel_open($channel);
+    $mq->queue_declare( $channel, $purpose );
+    $mq->consume( $channel, $purpose );
+
+    my $received = $mq->recv(0);
+
+    $self->_disconnect($mq);
+
+    return $received->{body};
 }
 
 =head1 AUTHOR
