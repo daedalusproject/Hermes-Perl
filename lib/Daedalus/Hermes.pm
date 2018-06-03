@@ -29,7 +29,42 @@ our $VERSION = '0.01';
 
 Service that provides communication between Daedalus Project services. Perl implementation.
 
+=head1 ATTRIBUTES
+
+=cut
+
+has 'queues' => ( is => 'ro', isa => 'HashRef', required => 1 );
+
 =head1 SUBROUTINES/METHODS
+
+=head1 BUILD
+
+Verifies queues
+
+=cut
+
+sub BUILD {
+
+    my $self = shift;
+
+    my $queue_ok      = 1;
+    my $error_message = "";
+    my @queue_keys    = keys %{ $self->queues };
+
+    if ( @queue_keys == 0 ) {
+        $queue_ok      = 0;
+        $error_message = "There is no defined queues.";
+    }
+
+    # Verify queues
+
+    #for my $queue ( keys %{$self->queues} ){
+    #
+    #}
+
+    croak "$error_message" if ( $queue_ok == 0 );
+
+}
 
 =head1 testConnection
 

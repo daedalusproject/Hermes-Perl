@@ -53,7 +53,9 @@ has 'timeout' => ( is => 'ro', isa => 'Int' );
 =cut
 
 sub BUILD {
-    my $self = shift;
+    my $class = shift;
+
+    my $self = $class->SUPER::BUILD();
 
     my $mq = Net::AMQP::RabbitMQ->new;
 
