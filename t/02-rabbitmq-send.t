@@ -11,16 +11,16 @@ BEGIN {
 
 my $HERMES = Daedalus::Hermes->new('rabbitmq');
 
-#my $hermes_rabbitmq =     $HERMES->new(
-#        {
-#            host     => 'localhost',
-#            user     => 'guest',
-#            password => 'guest',
-#            port     => 5672
-#            queues => {}
-#        }
-#    );
-#
-#$hermes_rabbitmq->send({})
+my $hemes = $HERMES->new(
+    {
+        host     => 'localhost',
+        user     => 'guest',
+        password => 'guest',
+        port     => 5672,
+        queues   => {
+            testqueue => { purpose => "test_queue", channel => 1 },
+        }
+    }
+);
 
 diag("Testing Daedalus::Hermes $Daedalus::Hermes::VERSION, Perl $], $^X");
