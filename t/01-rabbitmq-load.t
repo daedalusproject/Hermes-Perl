@@ -2,7 +2,7 @@
 use 5.006;
 use strict;
 use warnings;
-use Test::More tests => 11;
+use Test::More tests => 13;
 use Test::Exception;
 
 BEGIN {
@@ -100,11 +100,48 @@ throws_ok {
             port     => 5672,
             queues   => {
                 testqueue  => { purpose => "test_queue",       channel => -1 },
-                testqueue2 => { purpose => "other_test_queue", channel => 1 }
+                testqueue2 => { purpose => "other_test_queue", channel => 1 },
             }
         }
     );
 }
 qr/Channel must be positive number in/, "Channels has to be positive integers.";
+
+throws_ok {
+    $HERMES->new(
+        {
+            host     => 'localhost',
+            user     => 'guest',
+            password => 'guest',
+            port     => 5672,
+            queues   => {
+                testqueue  => { purpose => "test_queue",       channel => 2 },
+                testqueue2 => { purpose => "other_test_queue", channel => 1 },
+                testqueue3 =>
+                  { purpose => "yet_other_test_queue", channel => 2 },
+            }
+        }
+    );
+}
+qr/There are one or more queues sharing a channel/,
+  "Two queues can't use the same channel";
+
+ok(
+    $HERMES->new(
+        {
+            host     => 'localhost',
+            user     => 'guest',
+            password => 'guest',
+            port     => 5672,
+            queues   => {
+                testqueue  => { purpose => "test_queue",       channel => 2 },
+                testqueue2 => { purpose => "other_test_queue", channel => 1 },
+                testqueue3 =>
+                  { purpose => "yet_other_test_queue", channel => 3 },
+            }
+        }
+    ),
+    qw/Daedalus::Hermes::RabbitMQ shuld be instanced./
+);
 
 diag("Testing Daedalus::Hermes $Daedalus::Hermes::VERSION, Perl $], $^X");
