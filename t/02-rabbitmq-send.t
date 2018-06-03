@@ -2,7 +2,7 @@
 use 5.006;
 use strict;
 use warnings;
-use Test::More tests => 1;
+use Test::More tests => 4;
 use Test::Exception;
 
 BEGIN {
@@ -26,13 +26,14 @@ my $hermes = $HERMES->new(
 throws_ok {
     $hermes->send();
 }
-qr/There are is no defined channel/, "A queue is required to send a message.";
+qr/There are is no defined data for sending any message./,
+  "A queue is required to send a message.";
 
 throws_ok {
     $hermes->send( { queue => "testqueue" } );
 }
 
-qr/There are is no defined message/,
+qr/There are is no defined queue or message, cannot send any message./,
   "Of course, to send a message you need something to send";
 
 ok(
