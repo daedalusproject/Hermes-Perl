@@ -58,9 +58,22 @@ sub BUILD {
 
     # Verify queues
 
-    #for my $queue ( keys %{$self->queues} ){
-    #
-    #}
+    if ( $queue_ok == 1 ) {
+        for my $queue ( keys %{ $self->queues } ) {
+            if ( exists $self->queues->{$queue}->{'purpose'} ) {
+                if ( $self->queues->{$queue}->{'purpose'} =~ / / ) {
+                    $error_message .=
+                      "$queue purpose is not allowed to contain spaces. ";
+                    $queue_ok = 0;
+                }
+            }
+            else {
+                $error_message .= "$queue has no purpose defined. ";
+                $queue_ok = 0;
+            }
+        }
+
+    }
 
     croak "$error_message" if ( $queue_ok == 0 );
 

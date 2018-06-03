@@ -2,7 +2,7 @@
 use 5.006;
 use strict;
 use warnings;
-use Test::More tests => 5;
+use Test::More tests => 9;
 use Test::Exception;
 
 BEGIN {
@@ -28,6 +28,50 @@ throws_ok {
 }
 qr/There is no defined queues./,
 "Creating and Daedalus::Hermes::RabbitMQ instance with empty queues should fail.";
+
+throws_ok {
+    $HERMES->new(
+        { user => 'guest', password => 'guest', queues => { testqueue => {} } }
+    );
+}
+qr/testqueue has no purpose defined/,
+"Creating and Daedalus::Hermes instance with queues with no purpose whould fail.";
+
+throws_ok {
+    $HERMES->new(
+        {
+            user     => 'guest',
+            password => 'guest',
+            queues   => { testqueue => { purpose => "send things" } }
+        }
+    );
+}
+qr/testqueue purpose is not allowed to contain spaces/,
+  "'purpose' field is not allowed to contain spaces.";
+
+throws_ok {
+    $HERMES->new(
+        {
+            user     => 'guest',
+            password => 'guest',
+            queues   => { testqueue => {}, testqueue2 => {} }
+        }
+    );
+}
+qr/has no purpose defined/, "Hermes::Perl constructor shows all found errors.";
+
+throws_ok {
+    $HERMES->new(
+        {
+            user     => 'guest',
+            password => 'guest',
+            queues =>
+              { testqueue => { purpose => "send_things" }, testqueue2 => {} }
+        }
+    );
+}
+qr/testqueue2 has no purpose defined/,
+  "Hermes::Perl constructor checks all queues.";
 
 #throws_ok {
 #    $HERMES->new(
