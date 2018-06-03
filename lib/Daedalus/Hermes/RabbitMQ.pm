@@ -177,6 +177,9 @@ sub _validateMessageData {
             if ( exists( $self->queues->{ $message_data->{queue} } ) ) {
                 $is_valid = 1;
             }
+            else {
+                $is_valid = 0;
+            }
 
         }
         else {
@@ -202,20 +205,18 @@ sub send {
     my $self      = shift;
     my $send_data = shift;
 
-    if ( $self->_validateMessageData($send_data) ) {
+    $self->_validateMessageData($send_data);
 
-        my $channel = $self->queues->{ $send_data->{queue} }->{channel};
-        my $purpose = $self->queues->{ $send_data->{queue} }->{purpose};
+    my $channel = $self->queues->{ $send_data->{queue} }->{channel};
+    my $purpose = $self->queues->{ $send_data->{queue} }->{purpose};
 
-        my $mq = $self->_connect();
+    my $mq = $self->_connect();
 
-        $mq->channel_open($channel);
-        $mq->queue_declare( $channel, $purpose );
-        $mq->publish( $channel, $purpose, $send_data->{message} );
+    $mq->channel_open($channel);
+    $mq->queue_declare( $channel, $purpose );
+    $mq->publish( $channel, $purpose, $send_data->{message} );
 
-        $self->_disconnect($mq);
-
-    }
+    $self->_disconnect($mq);
 
 }
 
