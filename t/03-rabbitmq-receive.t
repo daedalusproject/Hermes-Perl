@@ -2,7 +2,7 @@
 use 5.006;
 use strict;
 use warnings;
-use Test::More tests => 3;
+use Test::More tests => 5;
 use Test::Exception;
 
 use String::Random;
@@ -31,6 +31,17 @@ throws_ok {
     $hermes->receive();
 }
 qr/There are is no defined data to connect./,
+  "A queue is required to receive a message.";
+
+throws_ok {
+    $hermes->receive( {} );
+}
+qr/There are is no defined queue./, "A queue is required to receive a message.";
+
+throws_ok {
+    $hermes->receive( { queue => "nonexistentqueue" } );
+}
+qr/Queue nonexistentqueue is not defined./,
   "A queue is required to receive a message.";
 
 my $random_string = new String::Random;
