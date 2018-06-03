@@ -71,6 +71,16 @@ sub BUILD {
                 $queue_ok = 0;
                 $error_message .= "Channel must be positive number in $queue. ";
             }
+            else {
+                if ( grep( /^$channel$/, @used_channels ) ) {
+                    $queue_ok = 0;
+                    $error_message .=
+                      "There are one or more queues sharing channel $channel";
+                }
+                else {
+                    push @used_channels, $channel;
+                }
+            }
         }
         else {
             $queue_ok = 0;

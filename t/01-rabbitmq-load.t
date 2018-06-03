@@ -123,7 +123,7 @@ throws_ok {
         }
     );
 }
-qr/There are one or more queues sharing a channel/,
+qr/There are one or more queues sharing channel/,
   "Two queues can't use the same channel";
 
 ok(
@@ -134,10 +134,10 @@ ok(
             password => 'guest',
             port     => 5672,
             queues   => {
-                testqueue  => { purpose => "test_queue",       channel => 2 },
+                testqueue  => { purpose => "test_queue",       channel => 11 },
                 testqueue2 => { purpose => "other_test_queue", channel => 1 },
                 testqueue3 =>
-                  { purpose => "yet_other_test_queue", channel => 3 },
+                  { purpose => "yet_other_test_queue", channel => 111 },
             }
         }
     ),
