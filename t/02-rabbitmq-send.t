@@ -24,20 +24,20 @@ my $hermes = $HERMES->new(
 );
 
 throws_ok {
-    $hermes->send();
+    $hermes->validateAndSend();
 }
 qr/There are is no defined data for sending any message./,
   "A queue is required to send a message.";
 
 throws_ok {
-    $hermes->send( { queue => "testqueue" } );
+    $hermes->validateAndSend( { queue => "testqueue" } );
 }
 
 qr/There are is no defined queue or message, cannot send any message./,
   "Of course, to send a message you need something to send";
 
 throws_ok {
-    $hermes->send(
+    $hermes->validateAndSend(
         { queue => "nonexistentqueue", message => "Not senging this" } );
 }
 
@@ -45,7 +45,7 @@ qr/Queue nonexistentqueue is not defined in Daedalus::Hermes::RabbitMQ configura
   "Selected queue has to be definned in Hermes instance.";
 
 ok(
-    $hermes->send(
+    $hermes->validateAndSend(
         { queue => "testqueue", message => "Ground Control to Major Tom." }
     )
 );
