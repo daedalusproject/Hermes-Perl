@@ -2,7 +2,7 @@
 use 5.006;
 use strict;
 use warnings;
-use Test::More tests => 3;
+use Test::More tests => 8;
 use Test::Exception;
 
 BEGIN {
@@ -15,6 +15,26 @@ qr/is not defined in 'Daedalus::Hermes'/,
 
 throws_ok { Daedalus::Hermes->new('hermes')->_testConnection() }
 qr/Define _testConnection\(\)/,
-  "testConnection is not defined in parent class.";
+  "_testConnection is not defined in parent class.";
+
+throws_ok { Daedalus::Hermes->new('hermes')->_send() }
+qr/Define _send\(\)/,
+  "_send is not defined in parent class.";
+
+throws_ok { Daedalus::Hermes->new('hermes')->_receive() }
+qr/Define _receive\(\)/,
+  "_receive is not defined in parent class.";
+
+throws_ok { Daedalus::Hermes->new('hermes')->_validateQueue() }
+qr/Define _validateQueue\(\)/,
+  "_validateQueue is not defined in parent class.";
+
+throws_ok { Daedalus::Hermes->new('hermes')->_processConnectionData() }
+qr/Define _processConnectionData\(\)/,
+  "_processConnectionData is not defined in parent class.";
+
+throws_ok { Daedalus::Hermes->new('hermes')->_validateMessageData() }
+qr/Define _validateMessageData\(\)/,
+  "_validateMessageData is not defined in parent class.";
 
 diag("Testing Daedalus::Hermes $Daedalus::Hermes::VERSION, Perl $], $^X");

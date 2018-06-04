@@ -76,7 +76,7 @@ sub BUILD {
     }
 
     if ( $queue_ok == 0 ) {
-        die "$error_message";
+        $self->_raiseException("$error_message");
     }
 
     return $self;
@@ -114,6 +114,34 @@ Receive a message from message broker connection.
 =cut
 
 sub _receive { die "Define _receive() in implementation" }
+
+=head2 _processConnectionData
+
+Processes connection data.
+
+=cut
+
+sub _processConnectionData {
+    die "Define _processConnectionData() in implementation";
+}
+
+=head2 _validateQueue
+
+Validates queue definition.
+
+=cut
+
+sub _validateQueue { die "Define _validateQueue() in implementation" }
+
+=head2 _validateMessageData
+
+Validates message data.
+
+=cut
+
+sub _validateMessageData {
+    die "Define _validateMessageData() in implementation";
+}
 
 =head2 _raiseException
 
