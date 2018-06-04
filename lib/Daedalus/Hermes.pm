@@ -37,7 +37,7 @@ has 'queues' => ( is => 'ro', isa => 'HashRef', required => 1 );
 
 =head1 SUBROUTINES/METHODS
 
-=head1 BUILD
+=head2 BUILD
 
 Verifies queues
 
@@ -76,14 +76,14 @@ sub BUILD {
     }
 
     if ( $queue_ok == 0 ) {
-        die "$error_message";
+        $self->_raiseException("$error_message");
     }
 
     return $self;
 
 }
 
-=head1 _testConnection
+=head2 _testConnection
 
 Tests connection attributes against
 
@@ -91,7 +91,59 @@ Tests connection attributes against
 
 sub _testConnection { die "Define _testConnection() in implementation" }
 
-=head1 _raiseException
+=head2 _connect
+
+Establishes connection with message broker service
+
+=cut
+
+sub _connect { die "Define _connect() in implementation" }
+
+=head2 _send
+
+Send a message through message broker connection.
+
+=cut
+
+sub _send { die "Define _send() in implementation" }
+
+=head2 _receive
+
+Receive a message from message broker connection.
+
+=cut
+
+sub _receive { die "Define _receive() in implementation" }
+
+=head2 _processConnectionData
+
+Processes connection data.
+
+=cut
+
+sub _processConnectionData {
+    die "Define _processConnectionData() in implementation";
+}
+
+=head2 _validateQueue
+
+Validates queue definition.
+
+=cut
+
+sub _validateQueue { die "Define _validateQueue() in implementation" }
+
+=head2 _validateMessageData
+
+Validates message data.
+
+=cut
+
+sub _validateMessageData {
+    die "Define _validateMessageData() in implementation";
+}
+
+=head2 _raiseException
 
 Croaks an error message
 Write a log in the near future.
@@ -103,6 +155,51 @@ sub _raiseException {
     my $error_message = shift;
 
     croak $error_message;
+}
+
+=head2 send
+
+Send a message through message broker connection.
+
+=cut
+
+sub send {
+    my $self      = shift;
+    my $send_data = shift;
+
+    $self->_validateMessageData($send_data);
+
+    my $connection_data = $self->_processConnectionData($send_data);
+
+    my $mq = $self->_connect($connection_data);
+
+    $self->_send( $send_data, $connection_data, $mq );
+
+    $self->_disconnect($mq);
+}
+
+=head2 receive
+
+Receive a message from message broker connection.
+
+=cut
+
+sub receive {
+
+    my $self       = shift;
+    my $queue_data = shift;
+
+    $self->_validateQueue($queue_data);
+
+    my $connection_data = $self->_processConnectionData($queue_data);
+
+    my $mq = $self->_connect($connection_data);
+
+    my $data_received = $self->_receive( $queue_data, $connection_data, $mq );
+
+    $self->_disconnect($mq);
+
+    return $data_received->{body};
 }
 
 =head1 FACTORY

@@ -97,7 +97,7 @@ sub BUILD {
     }
 }
 
-=head1 _testConnection
+=head2 _testConnection
 
 Tests connection attributes against RabbitMQ server.
 
@@ -111,15 +111,17 @@ sub _testConnection {
     return 1;
 }
 
-=head1 _connect
+=head2 _connect
 
 Connect against RabbitMQ server.
 
 =cut
 
 sub _connect {
-    my $self = shift;
-    my $mq   = Net::AMQP::RabbitMQ->new;
+    my $self            = shift;
+    my $connection_data = shift;
+
+    my $mq = Net::AMQP::RabbitMQ->new;
 
     $mq->connect(
 
@@ -140,7 +142,7 @@ sub _connect {
 
 }
 
-=head1 _disconnect
+=head2 _disconnect
 
 Closes RabbitMQ connection.
 
@@ -155,7 +157,7 @@ sub _disconnect {
     return 1;
 }
 
-=head1 _validateMessageData
+=head2 _validateMessageData
 
 Validates message Data.
 
@@ -188,7 +190,7 @@ sub _validateMessageData {
     }
 }
 
-=head1 _validateQueue
+=head2 _validateQueue
 
 Validates Queue existence.
 
@@ -216,59 +218,75 @@ sub _validateQueue {
     }
 }
 
-=head1 send
+=head2 _processConnectionData
+
+Procceses RabbitMQ connection data.
+
+=cut
+
+sub _processConnectionData {
+
+    my $self = shift;
+    my $data = shift;
+
+    my $connection_data = {
+        channel => $self->queues->{ $data->{queue} }->{channel},
+        purpose => $self->queues->{ $data->{queue} }->{purpose},
+    };
+
+    # Check extra options
+
+    return $connection_data;
+
+}
+
+=head2 _send
 
 Send a message through a RabbitMQ connection.
 
 =cut
 
-sub send {
+sub _send {
 
-    my $self      = shift;
-    my $send_data = shift;
+    my $self            = shift;
+    my $send_data       = shift;
+    my $connection_data = shift;
+    my $mq              = shift;
 
-    $self->_validateMessageData($send_data);
-
-    my $channel = $self->queues->{ $send_data->{queue} }->{channel};
-    my $purpose = $self->queues->{ $send_data->{queue} }->{purpose};
-
-    my $mq = $self->_connect();
-
-    $mq->channel_open($channel);
-    $mq->queue_declare( $channel, $purpose );
-    $mq->publish( $channel, $purpose, $send_data->{message} );
-
-    $self->_disconnect($mq);
+    $mq->channel_open( $connection_data->{channel} );
+    $mq->queue_declare( $connection_data->{channel},
+        $connection_data->{purpose} );
+    $mq->publish(
+        $connection_data->{channel},
+        $connection_data->{purpose},
+        $send_data->{message}
+    );
 
 }
 
-=head1 receive
+=head2 _receive
 
 Receive a message from a RabbitMQ connection.
 
 =cut
 
-sub receive {
+sub _receive {
 
-    my $self       = shift;
-    my $queue_data = shift;
+    my $self            = shift;
+    my $queue_data      = shift;
+    my $connection_data = shift;
+    my $mq              = shift;
 
-    $self->_validateQueue($queue_data);
+    #$self->_validateQueue($queue_data);
 
-    my $channel = $self->queues->{ $queue_data->{queue} }->{channel};
-    my $purpose = $self->queues->{ $queue_data->{queue} }->{purpose};
-
-    my $mq = $self->_connect();
-
-    $mq->channel_open($channel);
-    $mq->queue_declare( $channel, $purpose );
-    $mq->consume( $channel, $purpose );
+    $mq->channel_open( $connection_data->{channel} );
+    $mq->queue_declare( $connection_data->{channel},
+        $connection_data->{purpose} );
+    $mq->consume( $connection_data->{channel}, $connection_data->{purpose} );
 
     my $received = $mq->recv(0);
 
-    $self->_disconnect($mq);
-
-    return $received->{body};
+    return $received;
 }
 
 =head1 AUTHOR
