@@ -37,4 +37,8 @@ throws_ok { Daedalus::Hermes->new('hermes')->_validateMessageData() }
 qr/Define _validateMessageData\(\)/,
   "_validateMessageData is not defined in parent class.";
 
+throws_ok { Daedalus::Hermes->new('hermes')->_connect() }
+qr/Define _connect\(\)/,
+  "_connect is not defined in parent class.";
+
 diag("Testing Daedalus::Hermes $Daedalus::Hermes::VERSION, Perl $], $^X");
