@@ -163,7 +163,7 @@ Send a message through message broker connection.
 
 =cut
 
-sub send {
+sub validateAndSend {
     my $self      = shift;
     my $send_data = shift;
 
@@ -184,7 +184,7 @@ Receive a message from message broker connection.
 
 =cut
 
-sub receive {
+sub validateAndReceive {
 
     my $self       = shift;
     my $queue_data = shift;

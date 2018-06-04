@@ -28,18 +28,18 @@ my $hermes = $HERMES->new(
 );
 
 throws_ok {
-    $hermes->receive();
+    $hermes->validateAndReceive();
 }
 qr/There are is no defined data to connect./,
   "A queue is required to receive a message.";
 
 throws_ok {
-    $hermes->receive( {} );
+    $hermes->validateAndReceive( {} );
 }
 qr/There are is no defined queue./, "A queue is required to receive a message.";
 
 throws_ok {
-    $hermes->receive( { queue => "nonexistentqueue" } );
+    $hermes->validateAndReceive( { queue => "nonexistentqueue" } );
 }
 qr/Queue nonexistentqueue is not defined./,
   "A queue is required to receive a message.";
@@ -49,8 +49,10 @@ my $random        = $random_string->randpattern( 's' x 32 );
 
 my $unique_message = "$message - $random";
 
-$hermes->send( { queue => "testqueue", message => $unique_message } );
+$hermes->validateAndSend(
+    { queue => "testqueue", message => $unique_message } );
 
-ok( $hermes->receive( { queue => "testqueue" } ) eq $unique_message );
+ok( $hermes->validateAndReceive( { queue => "testqueue" } ) eq
+      $unique_message );
 
 diag("Testing Daedalus::Hermes $Daedalus::Hermes::VERSION, Perl $], $^X");
