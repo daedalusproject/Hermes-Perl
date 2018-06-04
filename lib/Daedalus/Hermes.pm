@@ -99,6 +99,22 @@ Establishes connection with message broker service
 
 sub _connect { die "Define _connect() in implementation" }
 
+=head2 _send
+
+Send a message through message broker connection.
+
+=cut
+
+sub _send { die "Define _send() in implementation" }
+
+=head2 _receive
+
+Receive a message from message broker connection.
+
+=cut
+
+sub _receive { die "Define _receive() in implementation" }
+
 =head2 _raiseException
 
 Croaks an error message
@@ -132,6 +148,30 @@ sub send {
     $self->_send( $send_data, $connection_data, $mq );
 
     $self->_disconnect($mq);
+}
+
+=head2 receive
+
+Receive a message from message broker connection.
+
+=cut
+
+sub receive {
+
+    my $self       = shift;
+    my $queue_data = shift;
+
+    $self->_validateQueue($queue_data);
+
+    my $connection_data = $self->_processConnectionData($queue_data);
+
+    my $mq = $self->_connect($connection_data);
+
+    my $data_received = $self->_receive( $queue_data, $connection_data, $mq );
+
+    $self->_disconnect($mq);
+
+    return $data_received->{body};
 }
 
 =head1 FACTORY
