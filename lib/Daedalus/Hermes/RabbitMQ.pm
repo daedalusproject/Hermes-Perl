@@ -11,6 +11,9 @@ use base qw( Daedalus::Hermes );
 use Moose;
 use Net::AMQP::RabbitMQ;
 use MooseX::StrictConstructor;
+
+use Scalar::Util qw(looks_like_number);
+
 use namespace::autoclean;
 
 =head1 NAME
@@ -62,8 +65,8 @@ sub BUILD {
     # Queue has to use a channel and channel numbers can't be repeated
     my @used_channels;
 
-    my @allowd_queue_options =
-      [ 'passive', 'durable', 'exclusive', 'auto_delete' ];
+    my @allowed_queue_options =
+      ( 'passive', 'durable', 'exclusive', 'auto_delete' );
 
     my $error_message = "";
 
@@ -101,17 +104,27 @@ sub BUILD {
             for my $option (
                 keys %{ $self->queues->{$queue}->{'queue_options'} } )
             {
-                if ( !( grep ( /^$option$/, @allowd_queue_options ) ) ) {
+                if ( !( grep ( /^$option$/, @allowed_queue_options ) ) ) {
                     $error_message .=
 "Queue options are restricted, \"$option\" in not a valid option.";
                     $queue_ok = 0;
                 }
                 else {
                     # Options values can be 0 or 1 only
-                    if ( $self->queues->{$queue}->{'queue_options'}->{$option}
-                        != 0
-                        && $self->queues->{$queue}->{'queue_options'}->{$option}
-                        != 1 )
+                    if (
+                        (
+                            !(
+                                looks_like_number(
+                                    $self->queues->{$queue}->{'queue_options'}
+                                      ->{$option}
+                                )
+                            )
+                        )
+                        || ( $self->queues->{$queue}->{'queue_options'}
+                            ->{$option} != 0
+                            && $self->queues->{$queue}->{'queue_options'}
+                            ->{$option} != 1 )
+                      )
                     {
                         $error_message .=
 "Queue options values must have boolean values, 0 or 1. \"$option\" value is invalid.";
