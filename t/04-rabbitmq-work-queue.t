@@ -2,7 +2,7 @@
 use 5.006;
 use strict;
 use warnings;
-use Test::More tests => 5;
+use Test::More tests => 8;
 use Test::Exception;
 
 use String::Random;
@@ -98,5 +98,64 @@ throws_ok {
 }
 qr/Queue options values must have boolean values, 0 or 1. "passive" value is invalid./,
   "Queue options must be 0 or 1.";
+
+throws_ok {
+    my $hermes = $HERMES->new(
+        {
+            host     => 'localhost',
+            user     => 'guest',
+            password => 'guest',
+            port     => 5672,
+            queues   => {
+                testqueue => {
+                    purpose       => "test_queue_sed_receive",
+                    channel       => 2,
+                    queue_options => { passive => 1, durable => 2 }
+                },
+            }
+        }
+    );
+
+}
+qr/Queue options values must have boolean values, 0 or 1. "durable" value is invalid./,
+  "Queue options must be 0 or 1.";
+
+ok(
+    $HERMES->new(
+        {
+            host     => 'localhost',
+            user     => 'guest',
+            password => 'guest',
+            port     => 5672,
+            queues   => {
+                testqueue => {
+                    purpose       => "test_queue_sed_receive",
+                    channel       => 2,
+                    queue_options => { passive => 1, durable => 0 }
+                },
+            }
+        }
+      )
+
+);
+
+ok(
+    $HERMES->new(
+        {
+            host     => 'localhost',
+            user     => 'guest',
+            password => 'guest',
+            port     => 5672,
+            queues   => {
+                testqueue => {
+                    purpose       => "test_queue_sed_receive",
+                    channel       => 2,
+                    queue_options => { passive => 0, durable => 0 }
+                },
+            }
+        }
+      )
+
+);
 
 diag("Testing Daedalus::Hermes $Daedalus::Hermes::VERSION, Perl $], $^X");
