@@ -24,16 +24,16 @@ throws_ok {
             port     => 5672,
             queues   => {
                 testqueue => {
-                    purpose => "test_queue_sed_receive",
-                    channel => 2,
-                    options => { nonsense => {} }
+                    purpose       => "test_queue_sed_receive",
+                    channel       => 2,
+                    queue_options => { nonsense => {} }
                 },
             }
         }
     );
 
 }
-qr/There is no option name called nonsense./,
+qr/Queue options are restricted, "nonsense" in not a valid option./,
   "Queue options names are restricted, nonsense does not exists.";
 
 diag("Testing Daedalus::Hermes $Daedalus::Hermes::VERSION, Perl $], $^X");

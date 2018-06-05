@@ -61,6 +61,10 @@ sub BUILD {
 
     # Queue has to use a channel and channel numbers can't be repeated
     my @used_channels;
+
+    my @allowd_queue_options =
+      [ 'passive', 'durable', 'exclusive', 'auto_delete' ];
+
     my $error_message = "";
 
     for my $queue ( keys %{ $self->queues } ) {
@@ -85,6 +89,38 @@ sub BUILD {
             $queue_ok = 0;
             $error_message .= "A channel number is required for $queue. ";
         }
+
+        # Check queue options
+        if ( exists $self->queues->{$queue}->{'queue_options'} ) {
+
+            # The only queue options allowed are:
+            #     passive      -> default 0
+            #     durable     -> default 0
+            #     exclusive   -> default 0
+            #     auto_delete -> default 0
+            for my $option (
+                keys %{ $self->queues->{$queue}->{'queue_options'} } )
+            {
+                if ( !( grep ( /^$option$/, @allowd_queue_options ) ) ) {
+                    $error_message .=
+"Queue options are restricted, \"$option\" in not a valid option.";
+                    $queue_ok = 0;
+                }
+                else {
+                    # Options values can be 0 or 1 only
+                    if ( $self->queues->{$queue}->{'queue_options'}->{$option}
+                        != 0
+                        && $self->queues->{$queue}->{'queue_options'}->{$option}
+                        != 1 )
+                    {
+                        $error_message .=
+"Queue options values must have boolean values, 0 or 1. \"$option\" value is invalid.";
+                        $queue_ok = 0;
+                    }
+                }
+            }
+        }
+
     }
 
     if ( $queue_ok == 1 ) {

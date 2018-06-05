@@ -141,7 +141,7 @@ ok(
             }
         }
     ),
-    qw/Daedalus::Hermes::RabbitMQ shuld be instanced./
+    "Daedalus::Hermes::RabbitMQ should be instanced."
 );
 
 diag("Testing Daedalus::Hermes $Daedalus::Hermes::VERSION, Perl $], $^X");
