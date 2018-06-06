@@ -134,6 +134,55 @@ sub BUILD {
             }
         }
 
+        # Publish Options
+        if ( exists $self->queues->{$queue}->{'publish_options'} ) {
+
+            # The only publish options allowed are:
+            #   exchange                      -> default 'amq.direct'
+            #   mandatory                    -> default 0
+            #   immediate                    -> default 0
+            #   force_utf8_in_header_strings -> default 0
+            for my $option (
+                keys %{ $self->queues->{$queue}->{'publish_options'} } )
+            {
+                if ( !( grep ( /^$option$/, @allowed_publish_options ) ) ) {
+                    $error_message .=
+"Publish options are restricted, \"$option\" in not a valid option.";
+                    $queue_ok = 0;
+                }
+                else {
+                    # Check boolean values
+                    if ( grep /^$option$/, @allowed_publish_boolean_options ) {
+                        if (
+                            _testBooleanOption(
+                                $self->queues->{$queue}->{'publish_options'}
+                                  ->{$option}
+                            )
+                          )
+                        {
+                            $error_message .=
+"Some publish options values must have boolean values, 0 or 1. \"$option\" value is invalid.";
+                            $queue_ok = 0;
+                        }
+                    }
+                    else {
+                        # Check string
+                        if (
+                            looks_like_number(
+                                $self->queues->{$queue}->{'publish_options'}
+                                  ->{$option}
+                            )
+                          )
+                        {
+                            $error_message .=
+"\"$option\" publish option is invalid, must be a string.";
+                            $queue_ok = 0;
+                        }
+                    }
+                }
+            }
+
+        }
     }
 
     if ( $queue_ok == 1 ) {

@@ -2,7 +2,7 @@
 use 5.006;
 use strict;
 use warnings;
-use Test::More tests => 8;
+use Test::More tests => 12;
 use Test::Exception;
 
 use String::Random;
@@ -163,7 +163,7 @@ throws_ok {
     );
 
 }
-qr/Some publish options must have boolean values, "mandatory" value is invalid./,
+qr/Some publish options values must have boolean values, 0 or 1. "mandatory" value is invalid./,
   "Execept 'exchange', publish options must have boolean values.";
 
 throws_ok {
@@ -219,6 +219,26 @@ ok(
                     purpose       => "test_queue_sed_receive",
                     channel       => 2,
                     queue_options => { passive => 0, durable => 0 }
+                },
+            }
+        }
+      )
+
+);
+
+ok(
+    $HERMES->new(
+        {
+            host     => 'localhost',
+            user     => 'guest',
+            password => 'guest',
+            port     => 5672,
+            queues   => {
+                testqueue => {
+                    purpose       => "test_queue_sed_receive",
+                    channel       => 2,
+                    queue_options => { passive => 0, durable => 0 },
+                    publish_options => { mandatory => 0 }
                 },
             }
         }
