@@ -68,6 +68,14 @@ sub BUILD {
     my @allowed_queue_options =
       ( 'passive', 'durable', 'exclusive', 'auto_delete' );
 
+    # Publish options
+
+    my @allowed_publish_boolean_options =
+      ( 'mandatory', 'immediate', 'force_utf8_in_header_strings' );
+    my @allowed_publish_string_options = ('exchange');
+    my @allowed_publish_options =
+      ( @allowed_publish_boolean_options, @allowed_publish_string_options );
+
     my $error_message = "";
 
     for my $queue ( keys %{ $self->queues } ) {
@@ -112,18 +120,10 @@ sub BUILD {
                 else {
                     # Options values can be 0 or 1 only
                     if (
-                        (
-                            !(
-                                looks_like_number(
-                                    $self->queues->{$queue}->{'queue_options'}
-                                      ->{$option}
-                                )
-                            )
+                        _testBooleanOption(
+                            $self->queues->{$queue}->{'queue_options'}
+                              ->{$option}
                         )
-                        || ( $self->queues->{$queue}->{'queue_options'}
-                            ->{$option} != 0
-                            && $self->queues->{$queue}->{'queue_options'}
-                            ->{$option} != 1 )
                       )
                     {
                         $error_message .=
@@ -144,6 +144,18 @@ sub BUILD {
     else {
         $self->_raiseException($error_message);
     }
+}
+
+=head2 _testBooleanOption
+
+Tests if boolean values are correct
+
+=cut
+
+sub _testBooleanOption() {
+    my $value = shift;
+
+    return ( !( looks_like_number($value) ) || ( $value != 0 && $value != 1 ) );
 }
 
 =head2 _testConnection
