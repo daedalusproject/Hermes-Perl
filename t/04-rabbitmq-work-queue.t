@@ -34,7 +34,7 @@ throws_ok {
 
 }
 qr/Queue options are restricted, "nonsense" in not a valid option./,
-  "Queue options names are restricted, nonsense does not exists.";
+  "Queue options names are restricted, nonsense does not exist.";
 
 throws_ok {
     my $hermes = $HERMES->new(
@@ -119,6 +119,74 @@ throws_ok {
 }
 qr/Queue options values must have boolean values, 0 or 1. "durable" value is invalid./,
   "Queue options must be 0 or 1.";
+
+# Publish options
+
+throws_ok {
+    my $hermes = $HERMES->new(
+        {
+            host     => 'localhost',
+            user     => 'guest',
+            password => 'guest',
+            port     => 5672,
+            queues   => {
+                testqueue => {
+                    purpose       => "test_queue_sed_receive",
+                    channel       => 2,
+                    queue_options => { passive => 1, durable => 1 },
+                    publish_options => { nonsense => 1 },
+                }
+            }
+        }
+    );
+
+}
+qr/Publish options are restricted, "nonsense" in not a valid option./,
+  "Publish options names are restricted, nonsense does not exist.";
+
+throws_ok {
+    my $hermes = $HERMES->new(
+        {
+            host     => 'localhost',
+            user     => 'guest',
+            password => 'guest',
+            port     => 5672,
+            queues   => {
+                testqueue => {
+                    purpose       => "test_queue_sed_receive",
+                    channel       => 2,
+                    queue_options => { passive => 1, durable => 1 },
+                    publish_options => { mandatory => "nonsense" },
+                }
+            }
+        }
+    );
+
+}
+qr/Some publish options must have boolean values, "mandatory" value is invalid./,
+  "Execept 'exchange', publish options must have boolean values.";
+
+throws_ok {
+    my $hermes = $HERMES->new(
+        {
+            host     => 'localhost',
+            user     => 'guest',
+            password => 'guest',
+            port     => 5672,
+            queues   => {
+                testqueue => {
+                    purpose         => "test_queue_sed_receive",
+                    channel         => 2,
+                    queue_options   => { passive => 1, durable => 1 },
+                    publish_options => { mandatory => 1, exchange => 1 },
+                }
+            }
+        }
+    );
+
+}
+qr/"exchange" publish option is invalid, must be a string./,
+  "'exchange'  publish option must a string.";
 
 ok(
     $HERMES->new(
