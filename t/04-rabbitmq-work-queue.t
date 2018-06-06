@@ -2,7 +2,7 @@
 use 5.006;
 use strict;
 use warnings;
-use Test::More tests => 12;
+use Test::More tests => 13;
 use Test::Exception;
 
 use String::Random;
@@ -239,6 +239,27 @@ ok(
                     channel       => 2,
                     queue_options => { passive => 0, durable => 0 },
                     publish_options => { mandatory => 0 }
+                },
+            }
+        }
+      )
+
+);
+
+ok(
+    $HERMES->new(
+        {
+            host     => 'localhost',
+            user     => 'guest',
+            password => 'guest',
+            port     => 5672,
+            queues   => {
+                testqueue => {
+                    purpose       => "test_queue_sed_receive",
+                    channel       => 2,
+                    queue_options => { passive => 0, durable => 0 },
+                    publish_options =>
+                      { mandatory => 0, exchange => "amq.direct" }
                 },
             }
         }
