@@ -2,7 +2,7 @@
 use 5.006;
 use strict;
 use warnings;
-use Test::More tests => 13;
+use Test::More tests => 18;
 use Test::Exception;
 
 use String::Random;
@@ -265,6 +265,127 @@ ok(
         }
       )
 
+);
+
+# AMQP props
+throws_ok {
+    my $hermes = $HERMES->new(
+        {
+            host     => 'localhost',
+            user     => 'guest',
+            password => 'guest',
+            port     => 5672,
+            queues   => {
+                testqueue => {
+                    purpose       => "test_queue_sed_receive",
+                    channel       => 2,
+                    queue_options => { passive => 1, durable => 1 },
+                    publish_options => { mandatory => 1 },
+                    amqp_props      => { nonsense  => 1 },
+                }
+            }
+        }
+    );
+
+}
+qr/AMQP props are restricted, "nonsense" in not a valid option./,
+  "AMQP props names are restricted, nonsense does not exist.";
+
+throws_ok {
+    my $hermes = $HERMES->new(
+        {
+            host     => 'localhost',
+            user     => 'guest',
+            password => 'guest',
+            port     => 5672,
+            queues   => {
+                testqueue => {
+                    purpose       => "test_queue_sed_receive",
+                    channel       => 2,
+                    queue_options => { passive => 1, durable => 1 },
+                    publish_options => { mandatory => 1 },
+                    amqp_props      => { priority  => "nonsense" },
+                }
+            }
+        }
+    );
+
+}
+qr/Some AMQP props values must have boolean values, 0 or 1. "priority" value is invalid./,
+  "'priority' prop must have boolean values.";
+
+throws_ok {
+    my $hermes = $HERMES->new(
+        {
+            host     => 'localhost',
+            user     => 'guest',
+            password => 'guest',
+            port     => 5672,
+            queues   => {
+                testqueue => {
+                    purpose       => "test_queue_sed_receive",
+                    channel       => 2,
+                    queue_options => { passive => 1, durable => 1 },
+                    publish_options => { mandatory => 1 },
+                    amqp_props      => { priority  => 1, content_type => 1 },
+                }
+            }
+        }
+    );
+
+}
+qr/"content_type" prop is invalid, must be a string./,
+  "'content_type'  prop must a string.";
+
+throws_ok {
+    my $hermes = $HERMES->new(
+        {
+            host     => 'localhost',
+            user     => 'guest',
+            password => 'guest',
+            port     => 5672,
+            queues   => {
+                testqueue => {
+                    purpose       => "test_queue_sed_receive",
+                    channel       => 2,
+                    queue_options => { passive => 1, durable => 1 },
+                    publish_options => { mandatory => 1 },
+                    amqp_props      => {
+                        priority       => 1,
+                        correlation_id => "1",
+                        headers        => "nonsense"
+                    },
+                }
+            }
+        }
+    );
+
+}
+qr/"headers" prop is invalid, must be a hash./, "'headers'  prop must a hash.";
+
+ok(
+    $HERMES->new(
+        {
+            host     => 'localhost',
+            user     => 'guest',
+            password => 'guest',
+            port     => 5672,
+            queues   => {
+                testqueue => {
+                    purpose       => "test_queue_sed_receive",
+                    channel       => 2,
+                    queue_options => { passive => 0, durable => 0 },
+                    publish_options =>
+                      { mandatory => 0, exchange => "amq.direct" },
+                    amqp_props => {
+                        priority       => 1,
+                        correlation_id => "1",
+                        headers        => { something => 1 }
+                    },
+                },
+            }
+        }
+    )
 );
 
 diag("Testing Daedalus::Hermes $Daedalus::Hermes::VERSION, Perl $], $^X");
