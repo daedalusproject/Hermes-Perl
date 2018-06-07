@@ -92,6 +92,13 @@ sub BUILD {
         @allowed_amqp_hash_props
     );
 
+    # basic_qos
+    my @allowed_basic_qos_integer_options =
+      ( 'prefetch_count', 'prefetch_size' );
+    my @allowed_basic_qos_boolean_options = ('global');
+    my @allowed_basic_qos_options = ( @allowed_basic_qos_integer_options,
+        @allowed_basic_qos_boolean_options );
+
     my $error_message = "";
 
     for my $queue ( keys %{ $self->queues } ) {
@@ -254,6 +261,58 @@ sub BUILD {
                         }
                     }
                 }
+            }
+        }
+
+        # basic_qos
+        if ( exists $self->queues->{$queue}->{'basic_qos_options'} ) {
+            for my $option (
+                keys %{ $self->queues->{$queue}->{'basic_qos_options'} } )
+            {
+
+                if ( !( grep ( /^$option$/, @allowed_basic_qos_options ) ) ) {
+                    $error_message .=
+"Basic qos options are restricted, \"$option\" in not a valid option.";
+                    $queue_ok = 0;
+                }
+                else {
+                    if ( grep /^$option$/, @allowed_basic_qos_integer_options )
+                    {
+                        if (
+                            !(
+                                looks_like_number(
+                                    $self->queues->{$queue}
+                                      ->{'basic_qos_options'}->{$option}
+                                )
+                            )
+                          )
+                        {
+                            $error_message .=
+"Some Basic qos options must be an integer. \"$option\" value is invalid.";
+                            $queue_ok = 0;
+                        }
+                    }
+                    elsif ( grep /^$option$/,
+                        @allowed_basic_qos_boolean_options )
+                    {
+                        if (
+                            (
+                                _testBooleanOption(
+                                    $self->queues->{$queue}
+                                      ->{'basic_qos_options'}->{$option}
+                                )
+                            )
+                          )
+                        {
+                            $error_message .=
+"Some Basic qos options must have a bool value. \"$option\" value is invalid.";
+                            $queue_ok = 0;
+                        }
+
+                    }
+
+                }
+
             }
         }
 

@@ -411,7 +411,7 @@ throws_ok {
     );
 
 }
-qr/Basic qos options are restricted, "nonsense" in not a valid options./,
+qr/Basic qos options are restricted, "nonsense" in not a valid option./,
   "Basic qos options are restricted, nonsense does not exist.";
 
 throws_ok {
