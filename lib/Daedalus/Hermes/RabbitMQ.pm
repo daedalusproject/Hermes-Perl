@@ -143,7 +143,7 @@ sub BUILD {
                 else {
                     # Options values can be 0 or 1 only
                     if (
-                        _testBooleanOption(
+                        _testBooleanOptionInvalid(
                             $self->queues->{$queue}->{'queue_options'}
                               ->{$option}
                         )
@@ -177,7 +177,7 @@ sub BUILD {
                     # Check boolean values
                     if ( grep /^$option$/, @allowed_publish_boolean_options ) {
                         if (
-                            _testBooleanOption(
+                            _testBooleanOptionInvalid(
                                 $self->queues->{$queue}->{'publish_options'}
                                   ->{$option}
                             )
@@ -297,7 +297,7 @@ sub BUILD {
                     {
                         if (
                             (
-                                _testBooleanOption(
+                                _testBooleanOptionInvalid(
                                     $self->queues->{$queue}
                                       ->{'basic_qos_options'}->{$option}
                                 )
@@ -327,13 +327,13 @@ sub BUILD {
     }
 }
 
-=head2 _testBooleanOption
+=head2 _testBooleanOptionInvalid
 
-Tests if boolean values are correct
+Tests if boolean values are incorrect
 
 =cut
 
-sub _testBooleanOption() {
+sub _testBooleanOptionInvalid() {
     my $value = shift;
 
     return ( !( looks_like_number($value) ) || ( $value != 0 && $value != 1 ) );
