@@ -288,7 +288,7 @@ throws_ok {
     );
 
 }
-qr/AMQP props are restricted, "nonsense" in not a valid option./,
+qr/AMQP props are restricted, "nonsense" in not a valid prop./,
   "AMQP props names are restricted, nonsense does not exist.";
 
 throws_ok {
@@ -311,8 +311,8 @@ throws_ok {
     );
 
 }
-qr/Some AMQP props values must have boolean values, 0 or 1. "priority" value is invalid./,
-  "'priority' prop must have boolean values.";
+qr/Some AMQP props values must be an integer. "priority" value is invalid./,
+  "'priority' prop must have integer values.";
 
 throws_ok {
     my $hermes = $HERMES->new(
@@ -327,14 +327,13 @@ throws_ok {
                     channel       => 2,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options => { mandatory => 1 },
-                    amqp_props      => { priority  => 1, content_type => 1 },
+                    amqp_props      => { priority  => 2, content_type => 1 },
                 }
             }
         }
     );
-
 }
-qr/"content_type" prop is invalid, must be a string./,
+qr/Some AMQP props values must be strings. "content_type" value is invalid./,
   "'content_type'  prop must a string.";
 
 throws_ok {
@@ -361,7 +360,8 @@ throws_ok {
     );
 
 }
-qr/"headers" prop is invalid, must be a hash./, "'headers'  prop must a hash.";
+qr/Some AMQP props values must be a hash. "headers" value is invalid./,
+  "'headers'prop must be a hash.";
 
 ok(
     $HERMES->new(

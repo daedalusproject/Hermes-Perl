@@ -76,6 +76,22 @@ sub BUILD {
     my @allowed_publish_options =
       ( @allowed_publish_boolean_options, @allowed_publish_string_options );
 
+    # AMQP 'props'
+    my @allowed_amqp_integer_props =
+      ( 'delivery_mode', 'priority', 'timestamp' );
+    my @allowed_amqp_string_props = (
+        'content_type',   'content_encoding',
+        'correlation_id', 'reply_to',
+        'expiration',     'message_id',
+        'type',           'user_id',
+        'app_id'
+    );
+    my @allowed_amqp_hash_props = ('headers');
+    my @allowed_amqp_props      = (
+        @allowed_amqp_integer_props, @allowed_amqp_string_props,
+        @allowed_amqp_hash_props
+    );
+
     my $error_message = "";
 
     for my $queue ( keys %{ $self->queues } ) {
@@ -183,15 +199,72 @@ sub BUILD {
             }
 
         }
-    }
 
-    if ( $queue_ok == 1 ) {
+        # AMQP options
+        #
 
-        $self->_testConnection();
+        if ( exists $self->queues->{$queue}->{'amqp_props'} ) {
+            for my $prop ( keys %{ $self->queues->{$queue}->{'amqp_props'} } ) {
+                if ( !( grep ( /^$prop$/, @allowed_amqp_props ) ) ) {
+                    $error_message .=
+"AMQP props are restricted, \"$prop\" in not a valid prop.";
+                    $queue_ok = 0;
+                }
+                else {
+                    # Check interger values
+                    if ( grep /^$prop$/, @allowed_amqp_integer_props ) {
+                        if (
+                            !(
+                                looks_like_number(
+                                    $self->queues->{$queue}->{'amqp_props'}
+                                      ->{$prop}
+                                )
+                            )
+                          )
+                        {
+                            $error_message .=
+"Some AMQP props values must be an integer. \"$prop\" value is invalid.";
+                            $queue_ok = 0;
+                        }
+                    }
 
-    }
-    else {
-        $self->_raiseException($error_message);
+                    # Check string values
+                    elsif ( grep /^$prop$/, @allowed_amqp_string_props ) {
+                        my $string_value =
+                          $self->queues->{$queue}->{'amqp_props'}->{$prop};
+                        unless ( $string_value & ~$string_value ) {
+                            $error_message .=
+"Some AMQP props values must be strings. \"$prop\" value is invalid.";
+                            $queue_ok = 0;
+
+                        }
+                    }
+
+                    # Hash
+                    elsif ( grep /^$prop$/, @allowed_amqp_hash_props ) {
+                        unless (
+                            ref(
+                                $self->queues->{$queue}->{'amqp_props'}->{$prop}
+                            ) eq "HASH"
+                          )
+                        {
+                            $error_message .=
+"Some AMQP props values must be a hash. \"$prop\" value is invalid.";
+                            $queue_ok = 0;
+                        }
+                    }
+                }
+            }
+        }
+
+        if ( $queue_ok == 1 ) {
+
+            $self->_testConnection();
+
+        }
+        else {
+            $self->_raiseException($error_message);
+        }
     }
 }
 
