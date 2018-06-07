@@ -2,7 +2,7 @@
 use 5.006;
 use strict;
 use warnings;
-use Test::More tests => 18;
+use Test::More tests => 22;
 use Test::Exception;
 
 use String::Random;
@@ -386,6 +386,105 @@ ok(
             }
         }
     )
+);
+
+# Basic qos options
+throws_ok {
+    my $hermes = $HERMES->new(
+        {
+            host     => 'localhost',
+            user     => 'guest',
+            password => 'guest',
+            port     => 5672,
+            queues   => {
+                testqueue => {
+                    purpose       => "test_queue_sed_receive",
+                    channel       => 2,
+                    queue_options => { passive => 1, durable => 1 },
+                    publish_options   => { mandatory => 1 },
+                    amqp_props        => { priority  => 1 },
+                    amqp_props        => { priority  => 1 },
+                    basic_qos_options => { nonsense  => 1 },
+                }
+            }
+        }
+    );
+
+}
+qr/Basic qos options are restricted, "nonsense" in not a valid options./,
+  "Basic qos options are restricted, nonsense does not exist.";
+
+throws_ok {
+    my $hermes = $HERMES->new(
+        {
+            host     => 'localhost',
+            user     => 'guest',
+            password => 'guest',
+            port     => 5672,
+            queues   => {
+                testqueue => {
+                    purpose       => "test_queue_sed_receive",
+                    channel       => 2,
+                    queue_options => { passive => 1, durable => 1 },
+                    publish_options   => { mandatory      => 1 },
+                    amqp_props        => { priority       => 1 },
+                    amqp_props        => { priority       => 1 },
+                    basic_qos_options => { prefetch_count => "1mnotanum3r" },
+                }
+            }
+        }
+    );
+
+}
+qr/Some Basic qos options must be an integer. "prefetch_count" value is invalid./,
+  "'prefetch_count' option must have integer value.";
+
+throws_ok {
+    my $hermes = $HERMES->new(
+        {
+            host     => 'localhost',
+            user     => 'guest',
+            password => 'guest',
+            port     => 5672,
+            queues   => {
+                testqueue => {
+                    purpose       => "test_queue_sed_receive",
+                    channel       => 2,
+                    queue_options => { passive => 1, durable => 1 },
+                    publish_options   => { mandatory      => 1 },
+                    amqp_props        => { priority       => 1 },
+                    amqp_props        => { priority       => 1 },
+                    basic_qos_options => { prefetch_count => 1, global => 2 },
+                }
+            }
+        }
+    );
+
+}
+qr/Some Basic qos options must have a bool value. "global" value is invalid./,
+  "'global' option must have boolean value.";
+
+ok(
+    my $hermes = $HERMES->new(
+        {
+            host     => 'localhost',
+            user     => 'guest',
+            password => 'guest',
+            port     => 5672,
+            queues   => {
+                testqueue => {
+                    purpose       => "test_queue_sed_receive",
+                    channel       => 2,
+                    queue_options => { passive => 1, durable => 1 },
+                    publish_options   => { mandatory      => 1 },
+                    amqp_props        => { priority       => 1 },
+                    amqp_props        => { priority       => 1 },
+                    basic_qos_options => { prefetch_count => 1, global => 0 },
+                }
+            }
+        }
+      )
+
 );
 
 diag("Testing Daedalus::Hermes $Daedalus::Hermes::VERSION, Perl $], $^X");
