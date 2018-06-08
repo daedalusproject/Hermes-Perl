@@ -533,60 +533,21 @@ sub _send {
     $mq->channel_open( $connection_data->{channel} );
 
     # Queue Declare
-    if ( !( exists( $connection_data->{queue_options} ) ) ) {
-        $mq->queue_declare( $connection_data->{channel},
-            $connection_data->{purpose} );
-    }
-    else {
-        $mq->queue_declare(
-            $connection_data->{channel},
-            $connection_data->{purpose},
-            $connection_data->{queue_options}
-        );
 
-    }
+    my $channel       = $connection_data->{channel};
+    my $purpose       = $connection_data->{purpose};
+    my $queue_options = $connection_data->{queue_options} || {};
+
+    $mq->queue_declare( $channel, $purpose, $queue_options, );
 
     # Publish
-    if (   !( exists( $connection_data->{publish_options} ) )
-        && !( exists( $connection_data->{mqp_props} ) ) )
-    {
-        $mq->publish(
-            $connection_data->{channel},
-            $connection_data->{purpose},
-            $send_data->{message},
-        );
-    }
-    else {
 
-        if ( ( exists( $connection_data->{publish_options} ) )
-            && !( exists( $connection_data->{mqp_props} ) ) )
-        {
-            $mq->publish(
-                $connection_data->{channel},
-                $connection_data->{purpose},
-                $send_data->{message}, $connection_data->{publish_options},
-            );
+    my $message         = $send_data->{message};
+    my $publish_options = $connection_data->{publish_options} || undef;
+    my $amqp_props      = $connection_data->{mqp_props} || {};
 
-        }
-        elsif ( !( exists( $connection_data->{publish_options} ) )
-            && ( exists( $connection_data->{mqp_props} ) ) )
-        {
-            $mq->publish(
-                $connection_data->{channel},
-                $connection_data->{purpose},
-                $send_data->{message}, undef, $connection_data->{amqp_props},
-            );
-        }
-        else {
-            $mq->publish(
-                $connection_data->{channel},
-                $connection_data->{purpose},
-                $send_data->{message},
-                $connection_data->{publish_options},
-                $connection_data->{amqp_props},
-            );
-        }
-    }
+    $mq->publish( $channel, $purpose, $message, $publish_options,
+        $amqp_props, );
 }
 
 =head2 _receive
