@@ -99,6 +99,9 @@ sub BUILD {
     my @allowed_basic_qos_options = ( @allowed_basic_qos_integer_options,
         @allowed_basic_qos_boolean_options );
 
+    # Consume options
+    my @allowed_consume_options = ( 'no_local', 'no_ack', 'props' );
+
     my $error_message = "";
 
     for my $queue ( keys %{ $self->queues } ) {
@@ -314,6 +317,37 @@ sub BUILD {
                 }
 
             }
+        }
+
+        # consume_options
+        if ( exists $self->queues->{$queue}->{'consume_options'} ) {
+            for my $option (
+                keys %{ $self->queues->{$queue}->{'consume_options'} } )
+            {
+                if ( !( grep ( /^$option$/, @allowed_consume_options ) ) ) {
+                    $error_message .=
+"Consume options are restricted, \"$option\" in not a valid option.";
+                    $queue_ok = 0;
+                }
+                else {
+                    if (
+                        (
+                            _testBooleanOptionInvalid(
+                                $self->queues->{$queue}->{'consume_options'}
+                                  ->{$option}
+                            )
+                        )
+                      )
+                    {
+                        $error_message .=
+"Consume options must have a bool value. \"$option\" value is invalid.";
+                        $queue_ok = 0;
+                    }
+
+                }
+
+            }
+
         }
 
         if ( $queue_ok == 1 ) {
