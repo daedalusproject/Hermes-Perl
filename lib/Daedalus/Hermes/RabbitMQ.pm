@@ -546,10 +546,14 @@ sub _send {
     # Publish
 
     my $message         = $send_data->{message};
-    my $publish_options = $connection_data->{publish_options};
-    $publish_options = undef unless ($publish_options);
-    my $mqp_props = $connection_data->{mqp_props};
-    $mqp_props = {} unless ($mqp_props);
+    my $publish_options = undef;
+    if ( exists( $connection_data->{publish_options} ) ) {
+        $publish_options = $connection_data->{publish_options};
+    }
+    my $mqp_props = {};
+    if ( exists( $connection_data->{mqp_props} ) ) {
+        $mqp_props = $connection_data->{mqp_props};
+    }
 
     $mq->publish( $channel, $purpose, $message, $publish_options, $mqp_props, );
 }
