@@ -508,11 +508,11 @@ sub _processConnectionData {
     my $data = shift;
 
     my $connection_data = {
-        channel       => $self->queues->{ $data->{queue} }->{channel},
-        purpose       => $self->queues->{ $data->{queue} }->{purpose},
-        queue_options => $self->queues->{ $data->{queue} }->{queue_options},
-
-        amqp_props => $self->queues->{ $data->{queue} }->{amqp_props},
+        channel         => $self->queues->{ $data->{queue} }->{channel},
+        purpose         => $self->queues->{ $data->{queue} }->{purpose},
+        queue_options   => $self->queues->{ $data->{queue} }->{queue_options},
+        publish_options => $self->queues->{ $data->{queue} }->{publish_options},
+        amqp_props      => $self->queues->{ $data->{queue} }->{amqp_props},
         basic_qos_options =>
           $self->queues->{ $data->{queue} }->{basic_qos_options},
         consume_options => $self->queues->{ $data->{queue} }->{consume_options},
@@ -554,11 +554,11 @@ sub _send {
 
     my $message         = $send_data->{message};
     my $publish_options = undef;
-    if ( exists( $connection_data->{publish_options} ) ) {
+    if ( $connection_data->{publish_options} ) {
         $publish_options = $connection_data->{publish_options};
     }
     my $amqp_props = {};
-    if ( exists( $connection_data->{amqp_props} ) ) {
+    if ( $connection_data->{amqp_props} ) {
         $amqp_props = $connection_data->{amqp_props};
     }
 
