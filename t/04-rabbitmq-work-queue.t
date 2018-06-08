@@ -2,7 +2,7 @@
 use 5.006;
 use strict;
 use warnings;
-use Test::More tests => 22;
+use Test::More tests => 26;
 use Test::Exception;
 
 use String::Random;
@@ -480,6 +480,109 @@ ok(
                     amqp_props        => { priority       => 1 },
                     amqp_props        => { priority       => 1 },
                     basic_qos_options => { prefetch_count => 1, global => 0 },
+                }
+            }
+        }
+      )
+
+);
+
+# Basic consume options
+throws_ok {
+    my $hermes = $HERMES->new(
+        {
+            host     => 'localhost',
+            user     => 'guest',
+            password => 'guest',
+            port     => 5672,
+            queues   => {
+                testqueue => {
+                    purpose       => "test_queue_sed_receive",
+                    channel       => 2,
+                    queue_options => { passive => 1, durable => 1 },
+                    publish_options   => { mandatory      => 1 },
+                    amqp_props        => { priority       => 1 },
+                    amqp_props        => { priority       => 1 },
+                    basic_qos_options => { prefetch_count => 1, global => 0 },
+                    consume_options   => { nonsense       => 0 },
+                }
+            }
+        }
+    );
+
+}
+qr/Consume options are restricted, "nonsense" in not a valid option./,
+  "Consume options are restricted, nonsense does not exist.";
+
+throws_ok {
+    my $hermes = $HERMES->new(
+        {
+            host     => 'localhost',
+            user     => 'guest',
+            password => 'guest',
+            port     => 5672,
+            queues   => {
+                testqueue => {
+                    purpose       => "test_queue_sed_receive",
+                    channel       => 2,
+                    queue_options => { passive => 1, durable => 1 },
+                    publish_options   => { mandatory      => 1 },
+                    amqp_props        => { priority       => 1 },
+                    amqp_props        => { priority       => 1 },
+                    basic_qos_options => { prefetch_count => 1, global => 0 },
+                    consume_options   => { no_local       => '1mn0tanumb3r' },
+                }
+            }
+        }
+    );
+
+}
+qr/Consume options must have a bool value. "no_local" value is invalid./,
+  "'no_local' option must have boolean value.";
+
+throws_ok {
+    my $hermes = $HERMES->new(
+        {
+            host     => 'localhost',
+            user     => 'guest',
+            password => 'guest',
+            port     => 5672,
+            queues   => {
+                testqueue => {
+                    purpose       => "test_queue_sed_receive",
+                    channel       => 2,
+                    queue_options => { passive => 1, durable => 1 },
+                    publish_options   => { mandatory      => 1 },
+                    amqp_props        => { priority       => 1 },
+                    amqp_props        => { priority       => 1 },
+                    basic_qos_options => { prefetch_count => 1, global => 0 },
+                    consume_options   => { no_local       => 2 },
+                }
+            }
+        }
+    );
+
+}
+qr/Consume options must have a bool value. "no_local" value is invalid./,
+  "'no_local' option must have boolean value.";
+
+ok(
+    my $hermes = $HERMES->new(
+        {
+            host     => 'localhost',
+            user     => 'guest',
+            password => 'guest',
+            port     => 5672,
+            queues   => {
+                testqueue => {
+                    purpose       => "test_queue_sed_receive",
+                    channel       => 2,
+                    queue_options => { passive => 1, durable => 1 },
+                    publish_options   => { mandatory      => 1 },
+                    amqp_props        => { priority       => 1 },
+                    amqp_props        => { priority       => 1 },
+                    basic_qos_options => { prefetch_count => 1, global => 0 },
+                    consume_options   => { no_local       => 0 },
                 }
             }
         }
