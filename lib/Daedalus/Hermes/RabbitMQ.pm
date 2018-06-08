@@ -531,14 +531,62 @@ sub _send {
     my $mq              = shift;
 
     $mq->channel_open( $connection_data->{channel} );
-    $mq->queue_declare( $connection_data->{channel},
-        $connection_data->{purpose} );
-    $mq->publish(
-        $connection_data->{channel},
-        $connection_data->{purpose},
-        $send_data->{message}
-    );
 
+    # Queue Declare
+    if ( !( exists( $connection_data->{queue_options} ) ) ) {
+        $mq->queue_declare( $connection_data->{channel},
+            $connection_data->{purpose} );
+    }
+    else {
+        $mq->queue_declare(
+            $connection_data->{channel},
+            $connection_data->{purpose},
+            $connection_data->{queue_options}
+        );
+
+    }
+
+    # Publish
+    if (   !( exists( $connection_data->{publish_options} ) )
+        && !( exists( $connection_data->{mqp_props} ) ) )
+    {
+        $mq->publish(
+            $connection_data->{channel},
+            $connection_data->{purpose},
+            $send_data->{message},
+        );
+    }
+    else {
+
+        if ( ( exists( $connection_data->{publish_options} ) )
+            && !( exists( $connection_data->{mqp_props} ) ) )
+        {
+            $mq->publish(
+                $connection_data->{channel},
+                $connection_data->{purpose},
+                $send_data->{message}, $connection_data->{publish_options},
+            );
+
+        }
+        elsif ( !( exists( $connection_data->{publish_options} ) )
+            && ( exists( $connection_data->{mqp_props} ) ) )
+        {
+            $mq->publish(
+                $connection_data->{channel},
+                $connection_data->{purpose},
+                $send_data->{message}, undef, $connection_data->{amqp_props},
+            );
+        }
+        else {
+            $mq->publish(
+                $connection_data->{channel},
+                $connection_data->{purpose},
+                $send_data->{message},
+                $connection_data->{publish_options},
+                $connection_data->{amqp_props},
+            );
+        }
+    }
 }
 
 =head2 _receive
