@@ -2,7 +2,7 @@
 use 5.006;
 use strict;
 use warnings;
-use Test::More tests => 26;
+use Test::More tests => 27;
 use Test::Exception;
 
 use String::Random;
@@ -567,7 +567,7 @@ qr/Consume options must have a bool value. "no_local" value is invalid./,
   "'no_local' option must have boolean value.";
 
 ok(
-    my $hermes = $HERMES->new(
+    my $hermes_work = $HERMES->new(
         {
             host     => 'localhost',
             user     => 'guest',
@@ -580,7 +580,6 @@ ok(
                     queue_options => { passive => 1, durable => 1 },
                     publish_options   => { mandatory      => 1 },
                     amqp_props        => { priority       => 1 },
-                    amqp_props        => { priority       => 1 },
                     basic_qos_options => { prefetch_count => 1, global => 0 },
                     consume_options   => { no_local       => 0 },
                 }
@@ -588,6 +587,34 @@ ok(
         }
       )
 
+);
+
+my $hermes_work_sender = $HERMES->new(
+    {
+        host     => 'localhost',
+        user     => 'guest',
+        password => 'guest',
+        port     => 5672,
+        queues   => {
+            testqueue => {
+                purpose       => "test_work_queue",
+                channel       => 3,
+                queue_options => { durable => 1 },
+                amqp_props    => { delivery_mode => 2 }
+            },
+        }
+    }
+);
+
+my $random_string = new String::Random;
+my $random        = $random_string->randpattern( 's' x 32 );
+
+my $unique_message = "$message - $random";
+
+ok(
+    $hermes_work_sender->validateAndSend(
+        { queue => "testqueue", message => $unique_message }
+    )
 );
 
 diag("Testing Daedalus::Hermes $Daedalus::Hermes::VERSION, Perl $], $^X");
