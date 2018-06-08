@@ -8,6 +8,7 @@ use Moose;
 
 use base qw( Daedalus::Hermes );
 
+use Data::Dumper;
 use Moose;
 use Net::AMQP::RabbitMQ;
 use MooseX::StrictConstructor;
@@ -507,8 +508,13 @@ sub _processConnectionData {
     my $data = shift;
 
     my $connection_data = {
-        channel => $self->queues->{ $data->{queue} }->{channel},
-        purpose => $self->queues->{ $data->{queue} }->{purpose},
+        channel       => $self->queues->{ $data->{queue} }->{channel},
+        purpose       => $self->queues->{ $data->{queue} }->{purpose},
+        queue_options => $self->queues->{ $data->{queue} }->{queue_options},
+
+   #amqp_props => $self->queues->{ $data->{queue} }->{amqp_props},
+   #basic_qos_options => $self->queues->{ $data->{queue} }->{basic_qos_options},
+   #consume_options => $self->queues->{ $data->{queue} }->{consume_options},
     };
 
     # Check extra options
@@ -537,11 +543,11 @@ sub _send {
     my $channel       = $connection_data->{channel};
     my $purpose       = $connection_data->{purpose};
     my $queue_options = {};
-    if ( exists( $connection_data->{queue_options} ) ) {
+    if ( $connection_data->{queue_options} ) {
         $queue_options = $connection_data->{queue_options};
     }
 
-    $mq->queue_declare( $channel, $purpose, $queue_options, );
+    $mq->queue_declare( $channel, $purpose, $queue_options );
 
     # Publish
 
