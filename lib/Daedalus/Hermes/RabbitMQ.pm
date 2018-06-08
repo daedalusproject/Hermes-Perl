@@ -536,8 +536,10 @@ sub _send {
 
     my $channel       = $connection_data->{channel};
     my $purpose       = $connection_data->{purpose};
-    my $queue_options = $connection_data->{queue_options};
-    $queue_options = {} unless ($queue_options);
+    my $queue_options = {};
+    if ( exists( $connection_data->{queue_options} ) ) {
+        $queue_options = $connection_data->{queue_options};
+    }
 
     $mq->queue_declare( $channel, $purpose, $queue_options, );
 
