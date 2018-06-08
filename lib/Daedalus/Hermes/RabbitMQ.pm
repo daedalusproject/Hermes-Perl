@@ -536,18 +536,20 @@ sub _send {
 
     my $channel       = $connection_data->{channel};
     my $purpose       = $connection_data->{purpose};
-    my $queue_options = $connection_data->{queue_options} || {};
+    my $queue_options = $connection_data->{queue_options};
+    $queue_options = {} unless ($queue_options);
 
     $mq->queue_declare( $channel, $purpose, $queue_options, );
 
     # Publish
 
     my $message         = $send_data->{message};
-    my $publish_options = $connection_data->{publish_options} || undef;
-    my $amqp_props      = $connection_data->{mqp_props} || {};
+    my $publish_options = $connection_data->{publish_options};
+    $publish_options = undef unless ($publish_options);
+    my $mqp_props = $connection_data->{mqp_props};
+    $mqp_props = {} unless ($mqp_props);
 
-    $mq->publish( $channel, $purpose, $message, $publish_options,
-        $amqp_props, );
+    $mq->publish( $channel, $purpose, $message, $publish_options, $mqp_props, );
 }
 
 =head2 _receive
