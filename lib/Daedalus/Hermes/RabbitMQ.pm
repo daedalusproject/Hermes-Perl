@@ -100,6 +100,7 @@ sub BUILD {
         @allowed_basic_qos_boolean_options );
 
     # Consume options
+    # consumer_tag => $tag,    #absent by default
     my @allowed_consume_options = ( 'no_local', 'no_ack', 'props' );
 
     my $error_message = "";
