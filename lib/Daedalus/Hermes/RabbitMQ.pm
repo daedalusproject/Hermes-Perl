@@ -512,9 +512,10 @@ sub _processConnectionData {
         purpose       => $self->queues->{ $data->{queue} }->{purpose},
         queue_options => $self->queues->{ $data->{queue} }->{queue_options},
 
-   #amqp_props => $self->queues->{ $data->{queue} }->{amqp_props},
-   #basic_qos_options => $self->queues->{ $data->{queue} }->{basic_qos_options},
-   #consume_options => $self->queues->{ $data->{queue} }->{consume_options},
+        amqp_props => $self->queues->{ $data->{queue} }->{amqp_props},
+        basic_qos_options =>
+          $self->queues->{ $data->{queue} }->{basic_qos_options},
+        consume_options => $self->queues->{ $data->{queue} }->{consume_options},
     };
 
     # Check extra options
@@ -556,12 +557,13 @@ sub _send {
     if ( exists( $connection_data->{publish_options} ) ) {
         $publish_options = $connection_data->{publish_options};
     }
-    my $mqp_props = {};
-    if ( exists( $connection_data->{mqp_props} ) ) {
-        $mqp_props = $connection_data->{mqp_props};
+    my $amqp_props = {};
+    if ( exists( $connection_data->{amqp_props} ) ) {
+        $amqp_props = $connection_data->{amqp_props};
     }
 
-    $mq->publish( $channel, $purpose, $message, $publish_options, $mqp_props, );
+    $mq->publish( $channel, $purpose, $message, $publish_options, $amqp_props,
+    );
 }
 
 =head2 _receive
@@ -576,8 +578,6 @@ sub _receive {
     my $queue_data      = shift;
     my $connection_data = shift;
     my $mq              = shift;
-
-    #$self->_validateQueue($queue_data);
 
     $mq->channel_open( $connection_data->{channel} );
     $mq->queue_declare( $connection_data->{channel},
