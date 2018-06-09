@@ -2,7 +2,7 @@
 use 5.006;
 use strict;
 use warnings;
-use Test::More tests => 29;
+use Test::More tests => 30;
 use Test::Exception;
 
 use String::Random;
@@ -652,5 +652,8 @@ ok(
         { queue => "testqueue", message => $unique_message }
     )
 );
+
+ok( $hermes_work_sender->validateAndReceive( { queue => "testqueue" } ) eq
+      $unique_message );
 
 diag("Testing Daedalus::Hermes $Daedalus::Hermes::VERSION, Perl $], $^X");
