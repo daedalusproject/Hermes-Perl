@@ -8,7 +8,6 @@ use Moose;
 
 use base qw( Daedalus::Hermes );
 
-use Data::Dumper;
 use Moose;
 use Net::AMQP::RabbitMQ;
 use MooseX::StrictConstructor;
@@ -68,6 +67,14 @@ sub BUILD {
 
     my @allowed_queue_options =
       ( 'passive', 'durable', 'exclusive', 'auto_delete' );
+
+    # The only queue options allowed are:
+    #     passive      -> default 0
+    #     durable     -> default 0
+    #     exclusive   -> default 0
+    #     auto_delete -> default 0
+    my $default_queue_options =
+      { passive => 0, durable => 0, exclusive => 0, auto_delete => 0 };
 
     # Publish options
 
@@ -130,13 +137,8 @@ sub BUILD {
         }
 
         # Check queue options
-        if ( exists $self->queues->{$queue}->{'queue_options'} ) {
+        if ( $self->queues->{$queue}->{'queue_options'} ) {
 
-            # The only queue options allowed are:
-            #     passive      -> default 0
-            #     durable     -> default 0
-            #     exclusive   -> default 0
-            #     auto_delete -> default 0
             for my $option (
                 keys %{ $self->queues->{$queue}->{'queue_options'} } )
             {
@@ -159,6 +161,24 @@ sub BUILD {
                         $queue_ok = 0;
                     }
                 }
+            }
+        }
+        else {
+            $self->queues->{$queue}->{'queue_options'} = {};
+        }
+
+        #Fill defaults
+        for my $option ( keys %{$default_queue_options} ) {
+            if (
+                !(
+                    exists(
+                        $self->queues->{$queue}->{'queue_options'}->{$option}
+                    )
+                )
+              )
+            {
+                $self->queues->{$queue}->{'queue_options'}->{$option} =
+                  $default_queue_options->{$option};
             }
         }
 
