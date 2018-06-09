@@ -111,7 +111,8 @@ sub BUILD {
 
     # Consume options
     # consumer_tag => $tag,    #absent by default
-    my @allowed_consume_options = ( 'no_local', 'no_ack', 'props' );
+    my @allowed_consume_options =
+      ( 'no_local', 'no_ack', 'props', 'consumer_tag' );
 
     my $error_message = "";
 
@@ -605,6 +606,14 @@ sub _receive {
     my $purpose           = $connection_data->{purpose};
     my $queue_options     = $connection_data->{queue_options};
     my $basic_qos_options = $connection_data->{basic_qos_options};
+    my $consume_options   = {};
+
+    my $send_ack = 0;
+
+    if ( $connection_data->{consume_options} ) {
+        my $consume_options = $connection_data->{consume_options};
+        $send_ack = $connection_data->{consume_options}->{no_ack} == 0;
+    }
 
     $mq->queue_declare( $channel, $purpose, $queue_options );
 
@@ -612,9 +621,13 @@ sub _receive {
         $mq->basic_qos( $channel, $basic_qos_options );
     }
 
-    $mq->consume( $connection_data->{channel}, $connection_data->{purpose} );
+    $mq->consume( $channel, $purpose, $consume_options );
 
     my $received = $mq->recv(0);
+
+    if ($send_ack) {
+        $mq->ack( $channel, $received->{delivery_tag} );
+    }
 
     return $received;
 }
