@@ -2,7 +2,7 @@
 use 5.006;
 use strict;
 use warnings;
-use Test::More tests => 28;
+use Test::More tests => 29;
 use Test::Exception;
 
 use String::Random;
@@ -622,5 +622,35 @@ ok(
 
 ok( $hermes_work_sender->validateAndReceive( { queue => "testqueue" } ) eq
       $unique_message );
+
+my $hermes_work_sender_ack = $HERMES->new(
+    {
+        host     => 'localhost',
+        user     => 'guest',
+        password => 'guest',
+        port     => 5672,
+        queues   => {
+            testqueue => {
+                purpose           => "test_work_queue",
+                channel           => 43,
+                queue_options     => { durable => 1 },
+                amqp_props        => { delivery_mode => 2 },
+                publish_options   => undef,
+                consume_options   => { no_ack => 1 },
+                basic_qos_options => { prefetch_count => 1 },
+            },
+        }
+    }
+);
+
+$random = $random_string->randpattern( 's' x 32 );
+
+$unique_message = "$message - $random";
+
+ok(
+    $hermes_work_sender_ack->validateAndSend(
+        { queue => "testqueue", message => $unique_message }
+    )
+);
 
 diag("Testing Daedalus::Hermes $Daedalus::Hermes::VERSION, Perl $], $^X");
