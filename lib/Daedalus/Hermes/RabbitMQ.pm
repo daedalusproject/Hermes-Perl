@@ -623,7 +623,7 @@ sub _receive {
 
     $mq->queue_declare( $channel, $purpose, $queue_options );
 
-    if ($basic_qos_options) {
+    if ( $connection_data->{basic_qos_options} ) {
         $mq->basic_qos( $channel, $basic_qos_options );
     }
 
