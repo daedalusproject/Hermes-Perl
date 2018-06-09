@@ -563,10 +563,7 @@ sub _send {
 
     my $channel       = $connection_data->{channel};
     my $purpose       = $connection_data->{purpose};
-    my $queue_options = {};
-    if ( $connection_data->{queue_options} ) {
-        $queue_options = $connection_data->{queue_options};
-    }
+    my $queue_options = $connection_data->{queue_options};
 
     $mq->queue_declare( $channel, $purpose, $queue_options );
 
@@ -604,10 +601,7 @@ sub _receive {
 
     my $channel       = $connection_data->{channel};
     my $purpose       = $connection_data->{purpose};
-    my $queue_options = {};
-    if ( $connection_data->{queue_options} ) {
-        $queue_options = $connection_data->{queue_options};
-    }
+    my $queue_options = $connection_data->{queue_options};
 
     $mq->queue_declare( $channel, $purpose, $queue_options );
     $mq->consume( $connection_data->{channel}, $connection_data->{purpose} );
