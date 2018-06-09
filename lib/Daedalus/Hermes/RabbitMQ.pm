@@ -8,6 +8,8 @@ use Moose;
 
 use base qw( Daedalus::Hermes );
 
+use Data::Dumper;
+
 use Moose;
 use Net::AMQP::RabbitMQ;
 use MooseX::StrictConstructor;
@@ -599,11 +601,17 @@ sub _receive {
 
     # Queue Declare
 
-    my $channel       = $connection_data->{channel};
-    my $purpose       = $connection_data->{purpose};
-    my $queue_options = $connection_data->{queue_options};
+    my $channel           = $connection_data->{channel};
+    my $purpose           = $connection_data->{purpose};
+    my $queue_options     = $connection_data->{queue_options};
+    my $basic_qos_options = $connection_data->{basic_qos_options};
 
     $mq->queue_declare( $channel, $purpose, $queue_options );
+
+    if ($basic_qos_options) {
+        $mq->basic_qos( $channel, $basic_qos_options );
+    }
+
     $mq->consume( $connection_data->{channel}, $connection_data->{purpose} );
 
     my $received = $mq->recv(0);
