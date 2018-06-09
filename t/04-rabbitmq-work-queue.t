@@ -597,12 +597,13 @@ my $hermes_work_sender = $HERMES->new(
         port     => 5672,
         queues   => {
             testqueue => {
-                purpose         => "test_work_queue",
-                channel         => 42,
-                queue_options   => { durable => 1 },
-                amqp_props      => { delivery_mode => 2 },
-                publish_options => undef,
-                consume_options => { no_ack => 0 },
+                purpose           => "test_work_queue",
+                channel           => 42,
+                queue_options     => { durable => 1 },
+                amqp_props        => { delivery_mode => 2 },
+                publish_options   => undef,
+                consume_options   => { no_ack => 0 },
+                basic_qos_options => { prefetch_count => 1 },
             },
         }
     }
