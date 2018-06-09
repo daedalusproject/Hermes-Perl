@@ -24,7 +24,7 @@ throws_ok {
             port     => 5672,
             queues   => {
                 testqueue => {
-                    purpose       => "test_queue_sed_receive",
+                    purpose       => "test_queue_send_receive",
                     channel       => 8,
                     queue_options => { nonsense => {} }
                 },
@@ -45,7 +45,7 @@ throws_ok {
             port     => 5672,
             queues   => {
                 testqueue => {
-                    purpose       => "test_queue_sed_receive",
+                    purpose       => "test_queue_send_receive",
                     channel       => 9,
                     queue_options => { nonsense => 1 }
                 },
@@ -66,7 +66,7 @@ throws_ok {
             port     => 5672,
             queues   => {
                 testqueue => {
-                    purpose       => "test_queue_sed_receive",
+                    purpose       => "test_queue_send_receive",
                     channel       => 10,
                     queue_options => { passive => "nonsense" }
                 },
@@ -87,7 +87,7 @@ throws_ok {
             port     => 5672,
             queues   => {
                 testqueue => {
-                    purpose       => "test_queue_sed_receive",
+                    purpose       => "test_queue_send_receive",
                     channel       => 11,
                     queue_options => { passive => 2 }
                 },
@@ -108,7 +108,7 @@ throws_ok {
             port     => 5672,
             queues   => {
                 testqueue => {
-                    purpose       => "test_queue_sed_receive",
+                    purpose       => "test_queue_send_receive",
                     channel       => 12,
                     queue_options => { passive => 1, durable => 2 }
                 },
@@ -131,7 +131,7 @@ throws_ok {
             port     => 5672,
             queues   => {
                 testqueue => {
-                    purpose       => "test_queue_sed_receive",
+                    purpose       => "test_queue_send_receive",
                     channel       => 13,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options => { nonsense => 1 },
@@ -153,7 +153,7 @@ throws_ok {
             port     => 5672,
             queues   => {
                 testqueue => {
-                    purpose       => "test_queue_sed_receive",
+                    purpose       => "test_queue_send_receive",
                     channel       => 14,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options => { mandatory => "nonsense" },
@@ -175,7 +175,7 @@ throws_ok {
             port     => 5672,
             queues   => {
                 testqueue => {
-                    purpose         => "test_queue_sed_receive",
+                    purpose         => "test_queue_send_receive",
                     channel         => 15,
                     queue_options   => { passive => 1, durable => 1 },
                     publish_options => { mandatory => 1, exchange => 1 },
@@ -197,7 +197,7 @@ ok(
             port     => 5672,
             queues   => {
                 testqueue => {
-                    purpose       => "test_queue_sed_receive",
+                    purpose       => "test_queue_send_receive",
                     channel       => 16,
                     queue_options => { passive => 1, durable => 0 }
                 },
@@ -216,7 +216,7 @@ ok(
             port     => 5672,
             queues   => {
                 testqueue => {
-                    purpose       => "test_queue_sed_receive",
+                    purpose       => "test_queue_send_receive",
                     channel       => 17,
                     queue_options => { passive => 0, durable => 0 }
                 },
@@ -235,7 +235,7 @@ ok(
             port     => 5672,
             queues   => {
                 testqueue => {
-                    purpose       => "test_queue_sed_receive",
+                    purpose       => "test_queue_send_receive",
                     channel       => 18,
                     queue_options => { passive => 0, durable => 0 },
                     publish_options => { mandatory => 0 }
@@ -255,7 +255,7 @@ ok(
             port     => 5672,
             queues   => {
                 testqueue => {
-                    purpose       => "test_queue_sed_receive",
+                    purpose       => "test_queue_send_receive",
                     channel       => 19,
                     queue_options => { passive => 0, durable => 0 },
                     publish_options =>
@@ -277,7 +277,7 @@ throws_ok {
             port     => 5672,
             queues   => {
                 testqueue => {
-                    purpose       => "test_queue_sed_receive",
+                    purpose       => "test_queue_send_receive",
                     channel       => 20,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options => { mandatory => 1 },
@@ -300,7 +300,7 @@ throws_ok {
             port     => 5672,
             queues   => {
                 testqueue => {
-                    purpose       => "test_queue_sed_receive",
+                    purpose       => "test_queue_send_receive",
                     channel       => 21,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options => { mandatory => 1 },
@@ -323,7 +323,7 @@ throws_ok {
             port     => 5672,
             queues   => {
                 testqueue => {
-                    purpose       => "test_queue_sed_receive",
+                    purpose       => "test_queue_send_receive",
                     channel       => 22,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options => { mandatory => 1 },
@@ -345,7 +345,7 @@ throws_ok {
             port     => 5672,
             queues   => {
                 testqueue => {
-                    purpose       => "test_queue_sed_receive",
+                    purpose       => "test_queue_send_receive",
                     channel       => 23,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options => { mandatory => 1 },
@@ -372,7 +372,7 @@ ok(
             port     => 5672,
             queues   => {
                 testqueue => {
-                    purpose       => "test_queue_sed_receive",
+                    purpose       => "test_queue_send_receive",
                     channel       => 24,
                     queue_options => { passive => 0, durable => 0 },
                     publish_options =>
@@ -398,7 +398,7 @@ throws_ok {
             port     => 5672,
             queues   => {
                 testqueue => {
-                    purpose       => "test_queue_sed_receive",
+                    purpose       => "test_queue_send_receive",
                     channel       => 25,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options   => { mandatory => 1 },
@@ -423,7 +423,7 @@ throws_ok {
             port     => 5672,
             queues   => {
                 testqueue => {
-                    purpose       => "test_queue_sed_receive",
+                    purpose       => "test_queue_send_receive",
                     channel       => 26,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options   => { mandatory      => 1 },
@@ -448,7 +448,7 @@ throws_ok {
             port     => 5672,
             queues   => {
                 testqueue => {
-                    purpose       => "test_queue_sed_receive",
+                    purpose       => "test_queue_send_receive",
                     channel       => 27,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options   => { mandatory      => 1 },
@@ -473,7 +473,7 @@ ok(
             port     => 5672,
             queues   => {
                 testqueue => {
-                    purpose       => "test_queue_sed_receive",
+                    purpose       => "test_queue_send_receive",
                     channel       => 28,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options   => { mandatory      => 1 },
@@ -497,7 +497,7 @@ throws_ok {
             port     => 5672,
             queues   => {
                 testqueue => {
-                    purpose       => "test_queue_sed_receive",
+                    purpose       => "test_queue_send_receive",
                     channel       => 29,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options   => { mandatory      => 1 },
@@ -523,7 +523,7 @@ throws_ok {
             port     => 5672,
             queues   => {
                 testqueue => {
-                    purpose       => "test_queue_sed_receive",
+                    purpose       => "test_queue_send_receive",
                     channel       => 30,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options   => { mandatory      => 1 },
@@ -549,7 +549,7 @@ throws_ok {
             port     => 5672,
             queues   => {
                 testqueue => {
-                    purpose       => "test_queue_sed_receive",
+                    purpose       => "test_queue_send_receive",
                     channel       => 40,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options   => { mandatory      => 1 },
@@ -575,7 +575,7 @@ ok(
             port     => 5672,
             queues   => {
                 testqueue => {
-                    purpose       => "test_queue_sed_receive",
+                    purpose       => "test_queue_send_receive",
                     channel       => 41,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options   => { mandatory      => 1 },
