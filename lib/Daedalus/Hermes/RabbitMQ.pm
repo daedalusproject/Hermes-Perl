@@ -73,8 +73,7 @@ sub BUILD {
     #     durable     -> default 0
     #     exclusive   -> default 0
     #     auto_delete -> default 0
-    my $default_queue_options =
-      { passive => 0, durable => 0, exclusive => 0, auto_delete => 0 };
+    my $default_queue_options = { durable => 1 };
 
     # Publish options
 
@@ -167,22 +166,22 @@ sub BUILD {
             $self->queues->{$queue}->{'queue_options'} = {};
         }
 
-  #Fill defaults
-  #        for my $option ( keys %{$default_queue_options} ) {
-  #            if (
-  #                !(
-  #                    exists(
-  #                        $self->queues->{$queue}->{'queue_options'}->{$option}
-  #                    )
-  #                )
-  #              )
-  #            {
-  #                $self->queues->{$queue}->{'queue_options'}->{$option} =
-  #                  $default_queue_options->{$option};
-  #            }
-  #        }
-  #
-  # Publish Options
+        #Fill defaults
+        for my $option ( keys %{$default_queue_options} ) {
+            if (
+                !(
+                    exists(
+                        $self->queues->{$queue}->{'queue_options'}->{$option}
+                    )
+                )
+              )
+            {
+                $self->queues->{$queue}->{'queue_options'}->{$option} =
+                  $default_queue_options->{$option};
+            }
+        }
+
+        # Publish Options
         if ( exists $self->queues->{$queue}->{'publish_options'} ) {
 
             # The only publish options allowed are:
