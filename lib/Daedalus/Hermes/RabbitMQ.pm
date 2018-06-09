@@ -616,7 +616,7 @@ sub _receive {
 
     if ( $connection_data->{consume_options} ) {
         my $consume_options = $connection_data->{consume_options};
-        if ( !$connection_data->{consume_options}->{no_ack} ) {
+        if ( !( $connection_data->{consume_options}->{no_ack} ) ) {
             $send_ack = 1;
         }
     }
