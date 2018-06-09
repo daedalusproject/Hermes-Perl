@@ -605,10 +605,14 @@ sub _receive {
     my $channel           = $connection_data->{channel};
     my $purpose           = $connection_data->{purpose};
     my $queue_options     = $connection_data->{queue_options};
-    my $basic_qos_options = $connection_data->{basic_qos_options};
+    my $basic_qos_options = {};
     my $consume_options   = {};
 
     my $send_ack = 0;
+
+    if ( $connection_data->{basic_qos_options} ) {
+        my $basic_qos_options = $connection_data->{basic_qos_options};
+    }
 
     if ( $connection_data->{consume_options} ) {
         my $consume_options = $connection_data->{consume_options};
