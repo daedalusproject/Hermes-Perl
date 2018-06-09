@@ -137,7 +137,7 @@ sub BUILD {
         }
 
         # Check queue options
-        if ( $self->queues->{$queue}->{'queue_options'} ) {
+        if ( exists( $self->queues->{$queue}->{'queue_options'} ) ) {
 
             for my $option (
                 keys %{ $self->queues->{$queue}->{'queue_options'} } )
@@ -167,22 +167,22 @@ sub BUILD {
             $self->queues->{$queue}->{'queue_options'} = {};
         }
 
-        #Fill defaults
-        for my $option ( keys %{$default_queue_options} ) {
-            if (
-                !(
-                    exists(
-                        $self->queues->{$queue}->{'queue_options'}->{$option}
-                    )
-                )
-              )
-            {
-                $self->queues->{$queue}->{'queue_options'}->{$option} =
-                  $default_queue_options->{$option};
-            }
-        }
-
-        # Publish Options
+  #Fill defaults
+  #        for my $option ( keys %{$default_queue_options} ) {
+  #            if (
+  #                !(
+  #                    exists(
+  #                        $self->queues->{$queue}->{'queue_options'}->{$option}
+  #                    )
+  #                )
+  #              )
+  #            {
+  #                $self->queues->{$queue}->{'queue_options'}->{$option} =
+  #                  $default_queue_options->{$option};
+  #            }
+  #        }
+  #
+  # Publish Options
         if ( exists $self->queues->{$queue}->{'publish_options'} ) {
 
             # The only publish options allowed are:
