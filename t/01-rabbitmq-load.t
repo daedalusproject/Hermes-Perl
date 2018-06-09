@@ -116,7 +116,7 @@ throws_ok {
             port     => 5672,
             queues   => {
                 testqueue  => { purpose => "test_queue",       channel => 2 },
-                testqueue2 => { purpose => "other_test_queue", channel => 1 },
+                testqueue2 => { purpose => "other_test_queue", channel => 3 },
                 testqueue3 =>
                   { purpose => "yet_other_test_queue", channel => 2 },
             }
@@ -134,10 +134,10 @@ ok(
             password => 'guest',
             port     => 5672,
             queues   => {
-                testqueue  => { purpose => "test_queue",       channel => 11 },
-                testqueue2 => { purpose => "other_test_queue", channel => 1 },
+                testqueue  => { purpose => "test_queue",       channel => 4 },
+                testqueue2 => { purpose => "other_test_queue", channel => 5 },
                 testqueue3 =>
-                  { purpose => "yet_other_test_queue", channel => 111 },
+                  { purpose => "yet_other_test_queue", channel => 6 },
             }
         }
     ),

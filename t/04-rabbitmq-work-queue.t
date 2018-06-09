@@ -25,7 +25,7 @@ throws_ok {
             queues   => {
                 testqueue => {
                     purpose       => "test_queue_sed_receive",
-                    channel       => 2,
+                    channel       => 8,
                     queue_options => { nonsense => {} }
                 },
             }
@@ -46,7 +46,7 @@ throws_ok {
             queues   => {
                 testqueue => {
                     purpose       => "test_queue_sed_receive",
-                    channel       => 2,
+                    channel       => 9,
                     queue_options => { nonsense => 1 }
                 },
             }
@@ -67,7 +67,7 @@ throws_ok {
             queues   => {
                 testqueue => {
                     purpose       => "test_queue_sed_receive",
-                    channel       => 2,
+                    channel       => 10,
                     queue_options => { passive => "nonsense" }
                 },
             }
@@ -88,7 +88,7 @@ throws_ok {
             queues   => {
                 testqueue => {
                     purpose       => "test_queue_sed_receive",
-                    channel       => 2,
+                    channel       => 11,
                     queue_options => { passive => 2 }
                 },
             }
@@ -109,7 +109,7 @@ throws_ok {
             queues   => {
                 testqueue => {
                     purpose       => "test_queue_sed_receive",
-                    channel       => 2,
+                    channel       => 12,
                     queue_options => { passive => 1, durable => 2 }
                 },
             }
@@ -132,7 +132,7 @@ throws_ok {
             queues   => {
                 testqueue => {
                     purpose       => "test_queue_sed_receive",
-                    channel       => 2,
+                    channel       => 13,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options => { nonsense => 1 },
                 }
@@ -154,7 +154,7 @@ throws_ok {
             queues   => {
                 testqueue => {
                     purpose       => "test_queue_sed_receive",
-                    channel       => 2,
+                    channel       => 14,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options => { mandatory => "nonsense" },
                 }
@@ -176,7 +176,7 @@ throws_ok {
             queues   => {
                 testqueue => {
                     purpose         => "test_queue_sed_receive",
-                    channel         => 2,
+                    channel         => 15,
                     queue_options   => { passive => 1, durable => 1 },
                     publish_options => { mandatory => 1, exchange => 1 },
                 }
@@ -198,7 +198,7 @@ ok(
             queues   => {
                 testqueue => {
                     purpose       => "test_queue_sed_receive",
-                    channel       => 2,
+                    channel       => 16,
                     queue_options => { passive => 1, durable => 0 }
                 },
             }
@@ -217,7 +217,7 @@ ok(
             queues   => {
                 testqueue => {
                     purpose       => "test_queue_sed_receive",
-                    channel       => 2,
+                    channel       => 17,
                     queue_options => { passive => 0, durable => 0 }
                 },
             }
@@ -236,7 +236,7 @@ ok(
             queues   => {
                 testqueue => {
                     purpose       => "test_queue_sed_receive",
-                    channel       => 2,
+                    channel       => 18,
                     queue_options => { passive => 0, durable => 0 },
                     publish_options => { mandatory => 0 }
                 },
@@ -256,7 +256,7 @@ ok(
             queues   => {
                 testqueue => {
                     purpose       => "test_queue_sed_receive",
-                    channel       => 2,
+                    channel       => 19,
                     queue_options => { passive => 0, durable => 0 },
                     publish_options =>
                       { mandatory => 0, exchange => "amq.direct" }
@@ -278,7 +278,7 @@ throws_ok {
             queues   => {
                 testqueue => {
                     purpose       => "test_queue_sed_receive",
-                    channel       => 2,
+                    channel       => 20,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options => { mandatory => 1 },
                     amqp_props      => { nonsense  => 1 },
@@ -301,7 +301,7 @@ throws_ok {
             queues   => {
                 testqueue => {
                     purpose       => "test_queue_sed_receive",
-                    channel       => 2,
+                    channel       => 21,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options => { mandatory => 1 },
                     amqp_props      => { priority  => "nonsense" },
@@ -324,7 +324,7 @@ throws_ok {
             queues   => {
                 testqueue => {
                     purpose       => "test_queue_sed_receive",
-                    channel       => 2,
+                    channel       => 22,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options => { mandatory => 1 },
                     amqp_props      => { priority  => 2, content_type => 1 },
@@ -346,7 +346,7 @@ throws_ok {
             queues   => {
                 testqueue => {
                     purpose       => "test_queue_sed_receive",
-                    channel       => 2,
+                    channel       => 23,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options => { mandatory => 1 },
                     amqp_props      => {
@@ -373,7 +373,7 @@ ok(
             queues   => {
                 testqueue => {
                     purpose       => "test_queue_sed_receive",
-                    channel       => 2,
+                    channel       => 24,
                     queue_options => { passive => 0, durable => 0 },
                     publish_options =>
                       { mandatory => 0, exchange => "amq.direct" },
@@ -399,7 +399,7 @@ throws_ok {
             queues   => {
                 testqueue => {
                     purpose       => "test_queue_sed_receive",
-                    channel       => 2,
+                    channel       => 25,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options   => { mandatory => 1 },
                     amqp_props        => { priority  => 1 },
@@ -424,7 +424,7 @@ throws_ok {
             queues   => {
                 testqueue => {
                     purpose       => "test_queue_sed_receive",
-                    channel       => 2,
+                    channel       => 26,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options   => { mandatory      => 1 },
                     amqp_props        => { priority       => 1 },
@@ -449,7 +449,7 @@ throws_ok {
             queues   => {
                 testqueue => {
                     purpose       => "test_queue_sed_receive",
-                    channel       => 2,
+                    channel       => 27,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options   => { mandatory      => 1 },
                     amqp_props        => { priority       => 1 },
@@ -474,7 +474,7 @@ ok(
             queues   => {
                 testqueue => {
                     purpose       => "test_queue_sed_receive",
-                    channel       => 2,
+                    channel       => 28,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options   => { mandatory      => 1 },
                     amqp_props        => { priority       => 1 },
@@ -498,7 +498,7 @@ throws_ok {
             queues   => {
                 testqueue => {
                     purpose       => "test_queue_sed_receive",
-                    channel       => 2,
+                    channel       => 29,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options   => { mandatory      => 1 },
                     amqp_props        => { priority       => 1 },
@@ -524,7 +524,7 @@ throws_ok {
             queues   => {
                 testqueue => {
                     purpose       => "test_queue_sed_receive",
-                    channel       => 2,
+                    channel       => 30,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options   => { mandatory      => 1 },
                     amqp_props        => { priority       => 1 },
@@ -550,7 +550,7 @@ throws_ok {
             queues   => {
                 testqueue => {
                     purpose       => "test_queue_sed_receive",
-                    channel       => 2,
+                    channel       => 40,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options   => { mandatory      => 1 },
                     amqp_props        => { priority       => 1 },
@@ -576,7 +576,7 @@ ok(
             queues   => {
                 testqueue => {
                     purpose       => "test_queue_sed_receive",
-                    channel       => 2,
+                    channel       => 41,
                     queue_options => { passive => 1, durable => 1 },
                     publish_options   => { mandatory      => 1 },
                     amqp_props        => { priority       => 1 },
@@ -598,7 +598,7 @@ my $hermes_work_sender = $HERMES->new(
         queues   => {
             testqueue => {
                 purpose         => "test_work_queue",
-                channel         => 3,
+                channel         => 42,
                 queue_options   => { durable => 1 },
                 amqp_props      => { delivery_mode => 2 },
                 publish_options => undef,

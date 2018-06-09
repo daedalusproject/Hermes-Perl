@@ -18,7 +18,7 @@ my $hermes = $HERMES->new(
         password => 'guest',
         port     => 5672,
         queues   => {
-            testqueue => { purpose => "test_queue", channel => 1 },
+            testqueue => { purpose => "test_queue", channel => 6 },
         }
     }
 );

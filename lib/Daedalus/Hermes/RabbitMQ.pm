@@ -50,7 +50,7 @@ has 'channel_max' => ( is => 'ro', isa => 'Int', default => 0, required => 1 );
 has 'frame_max' =>
   ( is => 'ro', isa => 'Int', default => 131072, required => 1 );
 has 'heartbeat' => ( is => 'ro', isa => 'Int', default => 0, required => 1 );
-has 'timeout' => ( is => 'ro', isa => 'Int' );
+has 'timeout' => ( is => 'ro', isa => 'Int', default => 60 );
 
 =head1 SUBROUTINES/METHODS
 =cut
@@ -73,7 +73,8 @@ sub BUILD {
     #     durable     -> default 0
     #     exclusive   -> default 0
     #     auto_delete -> default 0
-    my $default_queue_options = { durable => 1 };
+    my $default_queue_options =
+      { passive => 0, durable => 0, exclusive => 0, auto_delete => 0 };
 
     # Publish options
 
@@ -581,8 +582,7 @@ sub _send {
         $amqp_props = $connection_data->{amqp_props};
     }
 
-    $mq->publish( $channel, $purpose, $message, $publish_options, $amqp_props,
-    );
+    $mq->publish( $channel, $purpose, $message, $publish_options, $amqp_props );
 }
 
 =head2 _receive
@@ -599,8 +599,17 @@ sub _receive {
     my $mq              = shift;
 
     $mq->channel_open( $connection_data->{channel} );
-    $mq->queue_declare( $connection_data->{channel},
-        $connection_data->{purpose} );
+
+    # Queue Declare
+
+    my $channel       = $connection_data->{channel};
+    my $purpose       = $connection_data->{purpose};
+    my $queue_options = {};
+    if ( $connection_data->{queue_options} ) {
+        $queue_options = $connection_data->{queue_options};
+    }
+
+    $mq->queue_declare( $channel, $purpose, $queue_options );
     $mq->consume( $connection_data->{channel}, $connection_data->{purpose} );
 
     my $received = $mq->recv(0);
@@ -683,7 +692,7 @@ direct or contributory patent infringement, then this Artistic License
 to you shall terminate on the date that such litigation is filed.
 
 Disclaimer of Warranty: THE PACKAGE IS PROVIDED BY THE COPYRIGHT HOLDER
-AND CONTRIBUTORS "AS IS' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES.
+AND CONTRIBUTORS "iAS IS' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES.
 THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
 PURPOSE, OR NON-INFRINGEMENT ARE DISCLAIMED TO THE EXTENT PERMITTED BY
 YOUR LOCAL LAW. UNLESS REQUIRED BY LAW, NO COPYRIGHT HOLDER OR
