@@ -72,7 +72,6 @@ sub BUILD {
                 $queue_ok = 0;
             }
         }
-
     }
 
     if ( $queue_ok == 0 ) {

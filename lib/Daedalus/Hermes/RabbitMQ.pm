@@ -8,9 +8,14 @@ use Moose;
 
 use base qw( Daedalus::Hermes );
 
+use Data::Dumper;
+
 use Moose;
 use Net::AMQP::RabbitMQ;
 use MooseX::StrictConstructor;
+
+use Scalar::Util qw(looks_like_number);
+
 use namespace::autoclean;
 
 =head1 NAME
@@ -47,7 +52,7 @@ has 'channel_max' => ( is => 'ro', isa => 'Int', default => 0, required => 1 );
 has 'frame_max' =>
   ( is => 'ro', isa => 'Int', default => 131072, required => 1 );
 has 'heartbeat' => ( is => 'ro', isa => 'Int', default => 0, required => 1 );
-has 'timeout' => ( is => 'ro', isa => 'Int' );
+has 'timeout' => ( is => 'ro', isa => 'Int', default => 60 );
 
 =head1 SUBROUTINES/METHODS
 =cut
@@ -61,6 +66,54 @@ sub BUILD {
 
     # Queue has to use a channel and channel numbers can't be repeated
     my @used_channels;
+
+    my @allowed_queue_options =
+      ( 'passive', 'durable', 'exclusive', 'auto_delete' );
+
+    # The only queue options allowed are:
+    #     passive      -> default 0
+    #     durable     -> default 0
+    #     exclusive   -> default 0
+    #     auto_delete -> default 0
+    my $default_queue_options =
+      { passive => 0, durable => 0, exclusive => 0, auto_delete => 0 };
+
+    # Publish options
+
+    my @allowed_publish_boolean_options =
+      ( 'mandatory', 'immediate', 'force_utf8_in_header_strings' );
+    my @allowed_publish_string_options = ('exchange');
+    my @allowed_publish_options =
+      ( @allowed_publish_boolean_options, @allowed_publish_string_options );
+
+    # AMQP 'props'
+    my @allowed_amqp_integer_props =
+      ( 'delivery_mode', 'priority', 'timestamp' );
+    my @allowed_amqp_string_props = (
+        'content_type',   'content_encoding',
+        'correlation_id', 'reply_to',
+        'expiration',     'message_id',
+        'type',           'user_id',
+        'app_id'
+    );
+    my @allowed_amqp_hash_props = ('headers');
+    my @allowed_amqp_props      = (
+        @allowed_amqp_integer_props, @allowed_amqp_string_props,
+        @allowed_amqp_hash_props
+    );
+
+    # basic_qos
+    my @allowed_basic_qos_integer_options =
+      ( 'prefetch_count', 'prefetch_size' );
+    my @allowed_basic_qos_boolean_options = ('global');
+    my @allowed_basic_qos_options = ( @allowed_basic_qos_integer_options,
+        @allowed_basic_qos_boolean_options );
+
+    # Consume options
+    # consumer_tag => $tag,    #absent by default
+    my @allowed_consume_options =
+      ( 'no_local', 'no_ack', 'props', 'consumer_tag' );
+
     my $error_message = "";
 
     for my $queue ( keys %{ $self->queues } ) {
@@ -85,16 +138,264 @@ sub BUILD {
             $queue_ok = 0;
             $error_message .= "A channel number is required for $queue. ";
         }
-    }
 
-    if ( $queue_ok == 1 ) {
+        # Check queue options
+        if ( exists( $self->queues->{$queue}->{'queue_options'} ) ) {
 
-        $self->_testConnection();
+            for my $option (
+                keys %{ $self->queues->{$queue}->{'queue_options'} } )
+            {
+                if ( !( grep ( /^$option$/, @allowed_queue_options ) ) ) {
+                    $error_message .=
+"Queue options are restricted, \"$option\" in not a valid option.";
+                    $queue_ok = 0;
+                }
+                else {
+                    # Options values can be 0 or 1 only
+                    if (
+                        _testBooleanOptionInvalid(
+                            $self->queues->{$queue}->{'queue_options'}
+                              ->{$option}
+                        )
+                      )
+                    {
+                        $error_message .=
+"Queue options values must have boolean values, 0 or 1. \"$option\" value is invalid.";
+                        $queue_ok = 0;
+                    }
+                }
+            }
+        }
+        else {
+            $self->queues->{$queue}->{'queue_options'} = {};
+        }
 
+        #Fill defaults
+        for my $option ( keys %{$default_queue_options} ) {
+            if (
+                !(
+                    exists(
+                        $self->queues->{$queue}->{'queue_options'}->{$option}
+                    )
+                )
+              )
+            {
+                $self->queues->{$queue}->{'queue_options'}->{$option} =
+                  $default_queue_options->{$option};
+            }
+        }
+
+        # Publish Options
+        if ( exists $self->queues->{$queue}->{'publish_options'} ) {
+
+            # The only publish options allowed are:
+            #   exchange                      -> default 'amq.direct'
+            #   mandatory                    -> default 0
+            #   immediate                    -> default 0
+            #   force_utf8_in_header_strings -> default 0
+            for my $option (
+                keys %{ $self->queues->{$queue}->{'publish_options'} } )
+            {
+                if ( !( grep ( /^$option$/, @allowed_publish_options ) ) ) {
+                    $error_message .=
+"Publish options are restricted, \"$option\" in not a valid option.";
+                    $queue_ok = 0;
+                }
+                else {
+                    # Check boolean values
+                    if ( grep /^$option$/, @allowed_publish_boolean_options ) {
+                        if (
+                            _testBooleanOptionInvalid(
+                                $self->queues->{$queue}->{'publish_options'}
+                                  ->{$option}
+                            )
+                          )
+                        {
+                            $error_message .=
+"Some publish options values must have boolean values, 0 or 1. \"$option\" value is invalid.";
+                            $queue_ok = 0;
+                        }
+                    }
+                    else {
+                        # Check string
+                        if (
+                            looks_like_number(
+                                $self->queues->{$queue}->{'publish_options'}
+                                  ->{$option}
+                            )
+                          )
+                        {
+                            $error_message .=
+"\"$option\" publish option is invalid, must be a string.";
+                            $queue_ok = 0;
+                        }
+                    }
+                }
+            }
+
+        }
+
+        # AMQP options
+        #
+
+        if ( exists $self->queues->{$queue}->{'amqp_props'} ) {
+            for my $prop ( keys %{ $self->queues->{$queue}->{'amqp_props'} } ) {
+                if ( !( grep ( /^$prop$/, @allowed_amqp_props ) ) ) {
+                    $error_message .=
+"AMQP props are restricted, \"$prop\" in not a valid prop.";
+                    $queue_ok = 0;
+                }
+                else {
+                    # Check interger values
+                    if ( grep /^$prop$/, @allowed_amqp_integer_props ) {
+                        if (
+                            !(
+                                looks_like_number(
+                                    $self->queues->{$queue}->{'amqp_props'}
+                                      ->{$prop}
+                                )
+                            )
+                          )
+                        {
+                            $error_message .=
+"Some AMQP props values must be an integer. \"$prop\" value is invalid.";
+                            $queue_ok = 0;
+                        }
+                    }
+
+                    # Check string values
+                    elsif ( grep /^$prop$/, @allowed_amqp_string_props ) {
+                        my $string_value =
+                          $self->queues->{$queue}->{'amqp_props'}->{$prop};
+                        unless ( $string_value & ~$string_value ) {
+                            $error_message .=
+"Some AMQP props values must be strings. \"$prop\" value is invalid.";
+                            $queue_ok = 0;
+
+                        }
+                    }
+
+                    # Hash
+                    elsif ( grep /^$prop$/, @allowed_amqp_hash_props ) {
+                        unless (
+                            ref(
+                                $self->queues->{$queue}->{'amqp_props'}->{$prop}
+                            ) eq "HASH"
+                          )
+                        {
+                            $error_message .=
+"Some AMQP props values must be a hash. \"$prop\" value is invalid.";
+                            $queue_ok = 0;
+                        }
+                    }
+                }
+            }
+        }
+
+        # basic_qos
+        if ( exists $self->queues->{$queue}->{'basic_qos_options'} ) {
+            for my $option (
+                keys %{ $self->queues->{$queue}->{'basic_qos_options'} } )
+            {
+
+                if ( !( grep ( /^$option$/, @allowed_basic_qos_options ) ) ) {
+                    $error_message .=
+"Basic qos options are restricted, \"$option\" in not a valid option.";
+                    $queue_ok = 0;
+                }
+                else {
+                    if ( grep /^$option$/, @allowed_basic_qos_integer_options )
+                    {
+                        if (
+                            !(
+                                looks_like_number(
+                                    $self->queues->{$queue}
+                                      ->{'basic_qos_options'}->{$option}
+                                )
+                            )
+                          )
+                        {
+                            $error_message .=
+"Some Basic qos options must be an integer. \"$option\" value is invalid.";
+                            $queue_ok = 0;
+                        }
+                    }
+                    elsif ( grep /^$option$/,
+                        @allowed_basic_qos_boolean_options )
+                    {
+                        if (
+                            (
+                                _testBooleanOptionInvalid(
+                                    $self->queues->{$queue}
+                                      ->{'basic_qos_options'}->{$option}
+                                )
+                            )
+                          )
+                        {
+                            $error_message .=
+"Some Basic qos options must have a bool value. \"$option\" value is invalid.";
+                            $queue_ok = 0;
+                        }
+
+                    }
+
+                }
+
+            }
+        }
+
+        # consume_options
+        if ( exists $self->queues->{$queue}->{'consume_options'} ) {
+            for my $option (
+                keys %{ $self->queues->{$queue}->{'consume_options'} } )
+            {
+                if ( !( grep ( /^$option$/, @allowed_consume_options ) ) ) {
+                    $error_message .=
+"Consume options are restricted, \"$option\" in not a valid option.";
+                    $queue_ok = 0;
+                }
+                else {
+                    if (
+                        (
+                            _testBooleanOptionInvalid(
+                                $self->queues->{$queue}->{'consume_options'}
+                                  ->{$option}
+                            )
+                        )
+                      )
+                    {
+                        $error_message .=
+"Consume options must have a bool value. \"$option\" value is invalid.";
+                        $queue_ok = 0;
+                    }
+
+                }
+
+            }
+
+        }
+
+        if ( $queue_ok == 1 ) {
+
+            $self->_testConnection();
+
+        }
+        else {
+            $self->_raiseException($error_message);
+        }
     }
-    else {
-        $self->_raiseException($error_message);
-    }
+}
+
+=head2 _testBooleanOptionInvalid
+
+Tests if boolean values are incorrect
+
+=cut
+
+sub _testBooleanOptionInvalid() {
+    my $value = shift;
+
+    return ( !( looks_like_number($value) ) || ( $value != 0 && $value != 1 ) );
 }
 
 =head2 _testConnection
@@ -230,8 +531,14 @@ sub _processConnectionData {
     my $data = shift;
 
     my $connection_data = {
-        channel => $self->queues->{ $data->{queue} }->{channel},
-        purpose => $self->queues->{ $data->{queue} }->{purpose},
+        channel         => $self->queues->{ $data->{queue} }->{channel},
+        purpose         => $self->queues->{ $data->{queue} }->{purpose},
+        queue_options   => $self->queues->{ $data->{queue} }->{queue_options},
+        publish_options => $self->queues->{ $data->{queue} }->{publish_options},
+        amqp_props      => $self->queues->{ $data->{queue} }->{amqp_props},
+        basic_qos_options =>
+          $self->queues->{ $data->{queue} }->{basic_qos_options},
+        consume_options => $self->queues->{ $data->{queue} }->{consume_options},
     };
 
     # Check extra options
@@ -254,14 +561,28 @@ sub _send {
     my $mq              = shift;
 
     $mq->channel_open( $connection_data->{channel} );
-    $mq->queue_declare( $connection_data->{channel},
-        $connection_data->{purpose} );
-    $mq->publish(
-        $connection_data->{channel},
-        $connection_data->{purpose},
-        $send_data->{message}
-    );
 
+    # Queue Declare
+
+    my $channel       = $connection_data->{channel};
+    my $purpose       = $connection_data->{purpose};
+    my $queue_options = $connection_data->{queue_options};
+
+    $mq->queue_declare( $channel, $purpose, $queue_options );
+
+    # Publish
+
+    my $message         = $send_data->{message};
+    my $publish_options = undef;
+    if ( $connection_data->{publish_options} ) {
+        $publish_options = $connection_data->{publish_options};
+    }
+    my $amqp_props = {};
+    if ( $connection_data->{amqp_props} ) {
+        $amqp_props = $connection_data->{amqp_props};
+    }
+
+    $mq->publish( $channel, $purpose, $message, $publish_options, $amqp_props );
 }
 
 =head2 _receive
@@ -277,14 +598,42 @@ sub _receive {
     my $connection_data = shift;
     my $mq              = shift;
 
-    #$self->_validateQueue($queue_data);
-
     $mq->channel_open( $connection_data->{channel} );
-    $mq->queue_declare( $connection_data->{channel},
-        $connection_data->{purpose} );
-    $mq->consume( $connection_data->{channel}, $connection_data->{purpose} );
+
+    # Queue Declare
+
+    my $channel           = $connection_data->{channel};
+    my $purpose           = $connection_data->{purpose};
+    my $queue_options     = $connection_data->{queue_options};
+    my $basic_qos_options = {};
+    my $consume_options   = {};
+
+    my $send_ack = 0;
+
+    if ( $connection_data->{basic_qos_options} ) {
+        my $basic_qos_options = $connection_data->{basic_qos_options};
+    }
+
+    if ( $connection_data->{consume_options} ) {
+        my $consume_options = $connection_data->{consume_options};
+        if ( !( $connection_data->{consume_options}->{no_ack} ) ) {
+            $send_ack = 1;
+        }
+    }
+
+    $mq->queue_declare( $channel, $purpose, $queue_options );
+
+    if ( $connection_data->{basic_qos_options} ) {
+        $mq->basic_qos( $channel, $basic_qos_options );
+    }
+
+    $mq->consume( $channel, $purpose, $consume_options );
 
     my $received = $mq->recv(0);
+
+    if ($send_ack) {
+        $mq->ack( $channel, $received->{delivery_tag} );
+    }
 
     return $received;
 }
@@ -364,7 +713,7 @@ direct or contributory patent infringement, then this Artistic License
 to you shall terminate on the date that such litigation is filed.
 
 Disclaimer of Warranty: THE PACKAGE IS PROVIDED BY THE COPYRIGHT HOLDER
-AND CONTRIBUTORS "AS IS' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES.
+AND CONTRIBUTORS "iAS IS' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES.
 THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
 PURPOSE, OR NON-INFRINGEMENT ARE DISCLAIMED TO THE EXTENT PERMITTED BY
 YOUR LOCAL LAW. UNLESS REQUIRED BY LAW, NO COPYRIGHT HOLDER OR
