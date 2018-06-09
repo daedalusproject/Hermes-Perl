@@ -612,7 +612,9 @@ sub _receive {
 
     if ( $connection_data->{consume_options} ) {
         my $consume_options = $connection_data->{consume_options};
-        $send_ack = $connection_data->{consume_options}->{no_ack} == 0;
+        if ( $connection_data->{consume_options}->{no_ack} ) {
+            $send_ack = 1;
+        }
     }
 
     $mq->queue_declare( $channel, $purpose, $queue_options );
