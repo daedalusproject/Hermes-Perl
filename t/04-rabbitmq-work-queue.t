@@ -653,7 +653,14 @@ ok(
     )
 );
 
-ok( $hermes_work_sender->validateAndReceive( { queue => "testqueue" } ) eq
+my $received_message =
+  $hermes_work_sender_ack->validateAndReceive( { queue => "testqueue" } );
+
+ok( $hermes_work_sender_ack->validateAndReceive( { queue => "testqueue" } ) eq
       $unique_message );
+
+throws_ok {
+    $hermes_work_sender_ack->sendACK( { queue => "testqueue" }, );
+}
 
 diag("Testing Daedalus::Hermes $Daedalus::Hermes::VERSION, Perl $], $^X");

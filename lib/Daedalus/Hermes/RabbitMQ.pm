@@ -614,13 +614,6 @@ sub _receive {
         my $basic_qos_options = $connection_data->{basic_qos_options};
     }
 
-    if ( $connection_data->{consume_options} ) {
-        my $consume_options = $connection_data->{consume_options};
-        if ( !( $connection_data->{consume_options}->{no_ack} ) ) {
-            $send_ack = 1;
-        }
-    }
-
     $mq->queue_declare( $channel, $purpose, $queue_options );
 
     if ( $connection_data->{basic_qos_options} ) {
@@ -631,11 +624,46 @@ sub _receive {
 
     my $received = $mq->recv(0);
 
-    if ($send_ack) {
-        $mq->ack( $channel, $received->{delivery_tag} );
-    }
+    #    if ($send_ack) {
+    #        $mq->ack( $channel, $received->{delivery_tag} );
+    #    }
 
     return $received;
+}
+
+=head2 sendACK
+
+Sends ACK
+
+=cut
+
+sub sendACK {
+    my $self          = shift;
+    my $queue_data    = shift;
+    my $received_data = shift;
+
+    $self->_validateQueue($queue_data);
+
+    my $connection_data = $self->_processConnectionData($queue_data);
+
+    if ( $connection_data->{consume_options}->{no_ack} != 0 ) {
+        $self->_raiseException(
+"This queue sends ACK messages automatically, it is not possible to send ACK message again."
+        );
+    }
+
+    if ( $connection_data->{consume_options} ) {
+        my $consume_options = $connection_data->{consume_options};
+        if ( !( $connection_data->{consume_options}->{no_ack} ) ) {
+            $send_ack = 1;
+        }
+    }
+
+    my $mq = $self->_connect($connection_data);
+
+    $mq->ack( $channel, $received_data->{delivery_tag} );
+
+    $self->_disconnect($mq);
 }
 
 =head1 AUTHOR
