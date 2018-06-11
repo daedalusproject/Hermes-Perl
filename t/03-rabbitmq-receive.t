@@ -52,7 +52,7 @@ my $unique_message = "$message - $random";
 $hermes->validateAndSend(
     { queue => "testqueue", message => $unique_message } );
 
-ok( $hermes->validateAndReceive( { queue => "testqueue" } ) eq
+ok( $hermes->validateAndReceive( { queue => "testqueue" } )->{body} eq
       $unique_message );
 
 diag("Testing Daedalus::Hermes $Daedalus::Hermes::VERSION, Perl $], $^X");
