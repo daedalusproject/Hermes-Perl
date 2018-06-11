@@ -114,6 +114,13 @@ sub BUILD {
     my @allowed_consume_options =
       ( 'no_local', 'no_ack', 'props', 'consumer_tag' );
 
+    # Default consume options
+    #     no_local  -> default 0
+    #     no_ack    -> default 1
+    #     exclusive -> default 0
+    my $default_consume_options =
+      { no_local => 0, no_ack => 1, exclusive => 0 };
+
     my $error_message = "";
 
     for my $queue ( keys %{ $self->queues } ) {
@@ -170,7 +177,7 @@ sub BUILD {
             $self->queues->{$queue}->{'queue_options'} = {};
         }
 
-        #Fill defaults
+        # Default Queue Options
         for my $option ( keys %{$default_queue_options} ) {
             if (
                 !(
@@ -345,9 +352,9 @@ sub BUILD {
         }
 
         # consume_options
-        if ( exists $self->queues->{$queue}->{'consume_options'} ) {
+        if ( exists $self->queues->{$queue}->{consume_options} ) {
             for my $option (
-                keys %{ $self->queues->{$queue}->{'consume_options'} } )
+                keys %{ $self->queues->{$queue}->{consume_options} } )
             {
                 if ( !( grep ( /^$option$/, @allowed_consume_options ) ) ) {
                     $error_message .=
@@ -358,7 +365,7 @@ sub BUILD {
                     if (
                         (
                             _testBooleanOptionInvalid(
-                                $self->queues->{$queue}->{'consume_options'}
+                                $self->queues->{$queue}->{consume_options}
                                   ->{$option}
                             )
                         )
@@ -374,6 +381,26 @@ sub BUILD {
             }
 
         }
+        else {
+            $self->queues->{$queue}->{consume_options} = {};
+        }
+
+        for my $option ( keys %{$default_consume_options} ) {
+            if (
+                !(
+                    exists(
+                        $self->queues->{$queue}->{consume_options}->{$option}
+                    )
+                )
+              )
+            {
+                $self->queues->{$queue}->{consume_options}->{$option} =
+                  $default_consume_options->{$option};
+            }
+
+        }
+
+        # Default consume options
 
         if ( $queue_ok == 1 ) {
 
@@ -646,17 +673,13 @@ sub sendACK {
 
     my $connection_data = $self->_processConnectionData($queue_data);
 
-    if ( $connection_data->{consume_options}->{no_ack} != 0 ) {
+    #die Dumper($connection_data);
+    my $channel = $connection_data->{channel};
+
+    if ( $connection_data->{consume_options}->{no_ack} == 1 ) {
         $self->_raiseException(
 "This queue sends ACK messages automatically, it is not possible to send ACK message again."
         );
-    }
-
-    if ( $connection_data->{consume_options} ) {
-        my $consume_options = $connection_data->{consume_options};
-        if ( !( $connection_data->{consume_options}->{no_ack} ) ) {
-            $send_ack = 1;
-        }
     }
 
     my $mq = $self->_connect($connection_data);

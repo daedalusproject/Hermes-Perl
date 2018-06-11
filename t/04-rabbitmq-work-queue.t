@@ -655,7 +655,7 @@ my $received_message =
 throws_ok {
     $hermes_work_sender_no_ack->sendACK( { queue => "testqueue" }, $response );
 }
-qr/Consume options must have a bool value. "no_local" value is invalid./,
-  "'no_local' option must have boolean value.";
+qr/This queue sends ACK messages automatically, it is not possible to send ACK message again./,
+  "It is not allowed to send ack if it is automatically sent.";
 
 diag("Testing Daedalus::Hermes $Daedalus::Hermes::VERSION, Perl $], $^X");
