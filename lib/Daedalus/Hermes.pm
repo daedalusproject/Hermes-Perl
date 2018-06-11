@@ -198,7 +198,7 @@ sub validateAndReceive {
 
     $self->_disconnect($mq);
 
-    return $data_received->{body};
+    return $data_received;
 }
 
 =head1 FACTORY

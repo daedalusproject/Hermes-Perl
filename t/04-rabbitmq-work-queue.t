@@ -620,10 +620,14 @@ ok(
     )
 );
 
-ok( $hermes_work_sender->validateAndReceive( { queue => "testqueue" } ) eq
-      $unique_message );
+my $response =
+  $hermes_work_sender->validateAndReceive( { queue => "testqueue" } );
 
-my $hermes_work_sender_ack = $HERMES->new(
+ok( $response->{body} eq $unique_message );
+
+ok( $hermes_work_sender->sendACK( { queue => "testqueue" }, $response ) );
+
+my $hermes_work_sender_no_ack = $HERMES->new(
     {
         host     => 'localhost',
         user     => 'guest',
@@ -631,13 +635,8 @@ my $hermes_work_sender_ack = $HERMES->new(
         port     => 5672,
         queues   => {
             testqueue => {
-                purpose           => "test_work_queue",
-                channel           => 43,
-                queue_options     => { durable => 1 },
-                amqp_props        => { delivery_mode => 2 },
-                publish_options   => undef,
-                consume_options   => { no_ack => 1 },
-                basic_qos_options => { prefetch_count => 1 },
+                purpose => "test_work_queue_no_ack",
+                channel => 43,
             },
         }
     }
@@ -647,13 +646,16 @@ $random = $random_string->randpattern( 's' x 32 );
 
 $unique_message = "$message - $random";
 
-ok(
-    $hermes_work_sender_ack->validateAndSend(
-        { queue => "testqueue", message => $unique_message }
-    )
-);
+$hermes_work_sender_no_ack->validateAndSend(
+    { queue => "testqueue", message => $unique_message } );
 
-ok( $hermes_work_sender->validateAndReceive( { queue => "testqueue" } ) eq
-      $unique_message );
+my $received_message =
+  $hermes_work_sender_no_ack->validateAndReceive( { queue => "testqueue" } );
+
+throws_ok {
+    $hermes_work_sender_no_ack->sendACK( { queue => "testqueue" }, $response );
+}
+qr/This queue sends ACK messages automatically, it is not possible to send ACK message again./,
+  "It is not allowed to send ack if it is automatically sent.";
 
 diag("Testing Daedalus::Hermes $Daedalus::Hermes::VERSION, Perl $], $^X");
