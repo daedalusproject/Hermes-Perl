@@ -1,9 +1,11 @@
 requires 'Devel::Cover::Report::Codecov', 0.22;
 requires 'Moose';
 requires 'MooseX::NonMoose';
+requires 'MooseX::StrictConstructor';
 requires 'Module::PluginFinder';
 requires 'Net::AMQP::RabbitMQ';
-
+requires 'Class::Factory';
+requires 'String::Random';
 
 recommends 'Pod::Usage';
 

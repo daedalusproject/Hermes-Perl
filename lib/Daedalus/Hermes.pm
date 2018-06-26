@@ -6,7 +6,7 @@ use warnings;
 
 use Carp qw(croak);
 
-use Module::PluginFinder;
+use base qw( Class::Factory  );
 use Moose;
 use Moose::Util::TypeConstraints;
 use namespace::autoclean;
@@ -29,54 +29,192 @@ our $VERSION = '0.01';
 
 Service that provides communication between Daedalus Project services. Perl implementation.
 
-    use Daedalus::Hermes;
-
-    my $foo = Daedalus::Hermes->new();
-    ...
-=cut
-
-=head1 FACTORY
-
-This module implements a factory of different objects depending on the message broker we want to use
+=head1 ATTRIBUTES
 
 =cut
 
-my $finder = Module::PluginFinder->new(
-    search_path => 'Daedalus::Hermes',
-    filter      => sub {
-        my ( $class, $data ) = @_;
-        $class->understands($data);
-      }
-
-);
+has 'queues' => ( is => 'ro', isa => 'HashRef', required => 1 );
 
 =head1 SUBROUTINES/METHODS
 
 =head2 BUILD
 
+Verifies queues
+
 =cut
 
 sub BUILD {
+
     my $self = shift;
-    $self->testConnection();
+
+    my $queue_ok      = 1;
+    my $error_message = "";
+    my @queue_keys    = keys %{ $self->queues };
+
+    if ( @queue_keys == 0 ) {
+        $queue_ok      = 0;
+        $error_message = "There is no defined queues.";
+    }
+
+    # Verify queues
+
+    if ( $queue_ok == 1 ) {
+        for my $queue ( keys %{ $self->queues } ) {
+            if ( exists $self->queues->{$queue}->{'purpose'} ) {
+                if ( $self->queues->{$queue}->{'purpose'} =~ / / ) {
+                    $error_message .=
+                      "$queue purpose is not allowed to contain spaces. ";
+                    $queue_ok = 0;
+                }
+            }
+            else {
+                $error_message .= "$queue has no purpose defined. ";
+                $queue_ok = 0;
+            }
+        }
+    }
+
+    if ( $queue_ok == 0 ) {
+        $self->_raiseException("$error_message");
+    }
+
+    return $self;
+
 }
 
-=head2 call
+=head2 _testConnection
 
-Calls Hermes, the emissary and messenger of the gods... Well, not really.
-Instance an Hermes subclass depending of which configuration is provided.
+Tests connection attributes against
 
 =cut
 
-sub call {
-    my ( $self, $data ) = @_;
-    if ( !( exists $data->{'brokerType'} ) ) {
-        croak "Failed to instance Hermes. No brokerType found.";
-    }
+sub _testConnection { die "Define _testConnection() in implementation" }
 
-    return $finder->construct($data);
+=head2 _connect
 
+Establishes connection with message broker service
+
+=cut
+
+sub _connect { die "Define _connect() in implementation" }
+
+=head2 _send
+
+Send a message through message broker connection.
+
+=cut
+
+sub _send { die "Define _send() in implementation" }
+
+=head2 _receive
+
+Receive a message from message broker connection.
+
+=cut
+
+sub _receive { die "Define _receive() in implementation" }
+
+=head2 _processConnectionData
+
+Processes connection data.
+
+=cut
+
+sub _processConnectionData {
+    die "Define _processConnectionData() in implementation";
 }
+
+=head2 _validateQueue
+
+Validates queue definition.
+
+=cut
+
+sub _validateQueue { die "Define _validateQueue() in implementation" }
+
+=head2 _validateMessageData
+
+Validates message data.
+
+=cut
+
+sub _validateMessageData {
+    die "Define _validateMessageData() in implementation";
+}
+
+=head2 _raiseException
+
+Croaks an error message
+Write a log in the near future.
+
+=cut
+
+sub _raiseException {
+    my $self          = shift;
+    my $error_message = shift;
+
+    croak $error_message;
+}
+
+=head2 send
+
+Send a message through message broker connection.
+
+=cut
+
+sub validateAndSend {
+    my $self      = shift;
+    my $send_data = shift;
+
+    $self->_validateMessageData($send_data);
+
+    my $connection_data = $self->_processConnectionData($send_data);
+
+    my $mq = $self->_connect($connection_data);
+
+    $self->_send( $send_data, $connection_data, $mq );
+
+    $self->_disconnect($mq);
+}
+
+=head2 receive
+
+Receive a message from message broker connection.
+
+=cut
+
+sub validateAndReceive {
+
+    my $self       = shift;
+    my $queue_data = shift;
+
+    $self->_validateQueue($queue_data);
+
+    my $connection_data = $self->_processConnectionData($queue_data);
+
+    my $mq = $self->_connect($connection_data);
+
+    my $data_received = $self->_receive( $queue_data, $connection_data, $mq );
+
+    $self->_disconnect($mq);
+
+    return $data_received;
+}
+
+=head1 FACTORY
+
+Hermes is a factory.
+
+=cut
+
+=head2 Daedalus::Hermes::RabbitMQ
+
+Daedalus::Hermes::RabbitMQ - rabbitmq driver
+
+=cut
+
+__PACKAGE__->add_factory_type( rabbitmq => 'Daedalus::Hermes::RabbitMQ' );
+__PACKAGE__->add_factory_type( hermes   => 'Daedalus::Hermes' );
 
 =head1 AUTHOR
 
@@ -87,9 +225,6 @@ sub call {
 Please report any bugs or feature requests to C<bug-daedalus-hermes at rt.cpan.org>, or through
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Daedalus-Hermes>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
-
-
-
 
 =head1 SUPPORT
 
@@ -164,8 +299,6 @@ CONTRIBUTOR WILL BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR
 CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THE PACKAGE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 =cut
 
-__PACKAGE__->meta->make_immutable;
 1;    # End of Daedalus::Hermes
