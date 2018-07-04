@@ -11,6 +11,7 @@ services:
     - docker
 
 before_install:
+    - sudo apt-get install -y  gcc make libexpat1 libexpat1-dev libxml2-dev zlib1g-dev
     - docker pull rabbitmq:3.7.5
     - docker run -d --hostname raabitmq --name rabbitmq -p 15672:15672 -p 4369:4369 -p 5671:5671 -p 5672:5672 rabbitmq:3.7.5
 

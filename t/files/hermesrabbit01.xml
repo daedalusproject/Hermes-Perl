@@ -1,0 +1,10 @@
+<hermes>
+  <type>RabbitMQ</type>
+  <user>guest</user>
+  <password>guest</password>
+  <queue purpose="test_queue" channel="1" name="testqueue" />
+  <queue purpose="send_test_queue" channel="2" name="secondtestqueue">
+    <queue_options durable="1" delivery_mode="2" />
+    <publish_options prefetch_count="1" global="1" />
+  </queue>
+</hermes>
