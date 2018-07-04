@@ -1,0 +1,9 @@
+<hermes>
+  <type>RabbitMQ</type>
+  <queue purpose="test_queue" channel="1" name="testqueue" />
+  <queue purpose="test_queue" channel="2" name="secondtestqueue">
+    <queueoptions durable="1" />
+    <queueoptions delivery_mode="2" />
+    <publish_options prefetch_count="1" global=1 />
+  </queue>
+</hermes>

@@ -9,6 +9,9 @@ use Carp qw(croak);
 use base qw( Class::Factory  );
 use Moose;
 use Moose::Util::TypeConstraints;
+use XML::Parser;
+use XML::SimpleObject;
+
 use namespace::autoclean;
 
 use Data::Dumper;
@@ -19,11 +22,11 @@ Daedalus::Hermes - The great new Daedalus::Hermes!
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 SYNOPSIS
 
