@@ -247,7 +247,6 @@ sub _parse_hermes_config {
     eval { $parser->parsefile($filename); };
 
     if ($@) {
-        $@ =~ s/at \/.*?$//s;    # remove module line number
         croak "\nERROR in '$filename':\n$@\n";
     }
 
