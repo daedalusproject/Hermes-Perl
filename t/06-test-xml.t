@@ -2,7 +2,7 @@
 use 5.006;
 use strict;
 use warnings;
-use Test::More tests => 5;
+use Test::More tests => 2;
 use Test::Exception;
 
 use String::Random;
@@ -17,12 +17,10 @@ my $message = "Ground Control to Major Tom.";
 
 my $HERMES = Daedalus::Hermes->new('rabbitmq');
 
-my $config =
+my $hermes_config =
   Daedalus::Hermes::_parse_hermes_config("t/files/hermesrabbit02.xml");
 
-die Dumper($config);
-
-my $hermes = $HERMES->new(%$config);
+my $hermes = $HERMES->new( $hermes_config->{config}, );
 
 my $random_string = new String::Random;
 my $random        = $random_string->randpattern( 's' x 32 );
