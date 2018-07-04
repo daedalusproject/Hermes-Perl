@@ -201,6 +201,124 @@ sub validateAndReceive {
     return $data_received;
 }
 
+=head2 parse_hermes_config
+
+Parses xml hermes config. Croak if config is not valid.
+
+=cut
+
+sub _parse_hermes_config {
+
+    my $hermes_config = {};
+
+    my @valid_hermes_types = ('RabbitMQ');
+    my $required_hermes_fields = { 'RabbitMQ' => [ 'user', 'password' ] };
+    my $required_queue_fields =
+      { 'RabbitMQ' => [ 'name', 'channel', 'purpose' ] };
+    my $queue_options_fields = {
+        'RabbitMQ' => [
+            'queue_options',   'amqp_props',
+            'publish_options', 'consume_options',
+            'basic_qos_options'
+        ]
+    };
+    my $hermes_fields = {
+        'RabbitMQ' => [
+            'host',  'user',        'password',  'port',
+            'vhost', 'channel_max', 'frame_max', 'heartbeat',
+            'timeout'
+        ]
+    };
+
+    my $filename = shift;
+
+    # Validate if file exists
+    croak("There is no file provided, cannot parse any config.")
+      if ( !$filename );
+
+    croak("'$filename' file does no exist, cannot parse any config.")
+      unless ( -e $filename );
+
+    # File exists check or parse XML file
+    my $parser = XML::Parser->new( ErrorContext => 2, Style => 'Tree' );
+    eval { $parser->parsefile($filename); };
+
+    if ($@) {
+        $@ =~ s/at \/.*?$//s;    # remove module line number
+        croak "\nERROR in '$filename':\n$@\n";
+    }
+
+    my $config = XML::SimpleObject->new( $parser->parsefile($filename) );
+
+    croak("Hermes config not found, 'hermes' key is not pressent")
+      unless ( $config->child('hermes') );
+
+    my $hermes      = $config->child("hermes");
+    my $hermes_type = $hermes->child("type")->value;
+
+    croak("Type '$hermes_type' is invalid, configuration is invalid.")
+      unless ( ( grep ( /^$hermes_type$/, @valid_hermes_types ) ) );
+
+    $hermes_config->{type} = $hermes_type;
+
+    my $required_errors = "";
+
+    for
+      my $required_hermes_field ( @{ $required_hermes_fields->{$hermes_type} } )
+    {
+        if ( !$hermes->child($required_hermes_field) ) {
+            $required_errors = "$required_errors $required_hermes_field,";
+        }
+    }
+
+    croak(
+        "The following Hermes $hermes_type field are required:$required_errors")
+      unless ( !$required_errors );
+
+    $hermes_config->{config} = {};
+    $hermes_config->{config}->{queues} = {};
+
+    for my $field ( @{ $hermes_fields->{$hermes_type} } ) {
+        if ( $hermes->child($field) ) {
+            $hermes_config->{config}->{$field} = $hermes->child($field)->value;
+        }
+    }
+
+    for my $queue ( $hermes->child('queue') ) {
+        for my $item ( @{ $required_queue_fields->{$hermes_type} } ) {
+            croak "All queues have to have '$item' attirbute, invalid config."
+              unless ( $queue->attribute($item) );
+        }
+        $hermes_config->{config}->{queues}->{ $queue->attribute('name') } = {};
+        $hermes_config->{config}->{queues}->{ $queue->attribute('name') }
+          ->{purpose} = $queue->attribute('purpose');
+        $hermes_config->{config}->{queues}->{ $queue->attribute('name') }
+          ->{channel} = $queue->attribute('channel');
+        if ( $queue->children ) {
+            for my $queue_child ( $queue->children ) {
+                my $child_name = $queue_child->name;
+                croak(
+"Parameter '$child_name' is not a valid queue parameter, invalid config."
+                  )
+                  unless (
+                    grep( /^$child_name$/,
+                        @{ $queue_options_fields->{$hermes_type} } )
+                  );
+                $hermes_config->{config}->{queues}
+                  ->{ $queue->attribute('name') }->{$child_name} = {};
+                my %queue_atributes = $queue_child->attributes;
+                for my $attribute ( keys %queue_atributes ) {
+                    $hermes_config->{config}->{queues}
+                      ->{ $queue->attribute('name') }->{$child_name}
+                      ->{$attribute} = $queue_atributes{$attribute};
+                }
+            }
+        }
+    }
+
+    return $hermes_config;
+}
+
 =head1 FACTORY
 
 Hermes is a factory.
