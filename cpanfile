@@ -7,7 +7,7 @@ requires 'Net::AMQP::RabbitMQ';
 requires 'Class::Factory';
 requires 'String::Random';
 requires 'XML::LibXML';
-requires 'XML::Parser', 2.36;
+requires 'XML::Parser';
 requires 'XML::SimpleObject';
 
 recommends 'Pod::Usage';
