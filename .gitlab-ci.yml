@@ -6,7 +6,7 @@ stages:
 unit_tests:
     stage: test
     before_script:
-        - apt-get update -qq && apt-get install -y gcc make libexpat1 libexpat1-dev libxml2-dev zlib1g-dev
+        - apt-get update -qq && apt-get install -y gcc make libexpat1 libexpat1-dev libxml2-dev zlib1g-dev openssl
     script:
         - perl --version
         - cpanm --quiet --installdeps --notest .
