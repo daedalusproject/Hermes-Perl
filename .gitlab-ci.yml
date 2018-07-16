@@ -10,6 +10,7 @@ unit_tests:
         - echo "deb https://dl.bintray.com/rabbitmq/debian bionic main" | tee /etc/apt/sources.list.d/bintray.rabbitmq.list
         - wget -O- https://dl.bintray.com/rabbitmq/Keys/rabbitmq-release-signing-key.asc | apt-key add -
         - apt-get update -qq && apt-get install -y rabbitmq-server
+        - service rabbitmq-server start
     script:
         - perl --version
         - cpanm --quiet --installdeps --notest .
