@@ -7,19 +7,6 @@ unit_tests:
     stage: test
     before_script:
         - apt-get update -qq && apt-get install -y gcc make cpanminus libexpat1 expat libexpat1-dev libxml2-dev zlib1g-dev libssl-dev wget
-        - echo "deb https://dl.bintray.com/rabbitmq/debian bionic main" | tee /etc/apt/sources.list.d/bintray.rabbitmq.list
-        - wget -O- https://dl.bintray.com/rabbitmq/Keys/rabbitmq-release-signing-key.asc | apt-key add -
-        - apt-get update -qq && apt-get install -y rabbitmq-server
-        - service rabbitmq-server start
-    script:
-        - perl --version
-        - cpanm --quiet --installdeps --notest .
-        - perl Makefile.PL && make && mutator mutate lib/Daedalus/Hermes.pm && mutator mutate lib/Daedalus/Hermes/RabbitMQ.pm && make test && mutator test
-
-unit_tests_using_ubuntu_packages:
-    stage: test
-    before_script:
-        - apt-get update -qq && apt-get install -y gcc make cpanminus libexpat1 expat libexpat1-dev libxml2-dev zlib1g-dev libssl-dev wget
         - echo "deb https://dl.bintray.com/rabbitmq/debian bionic main" > /etc/apt/sources.list.d/bintray.rabbitmq.list
         - echo "deb [ arch=amd64  ] http://repo.daedalus-project.io/ any daedalus" > /etc/apt/sources.list.d/daedalus-project.list
         - wget -O- https://dl.bintray.com/rabbitmq/Keys/rabbitmq-release-signing-key.asc | apt-key add -
