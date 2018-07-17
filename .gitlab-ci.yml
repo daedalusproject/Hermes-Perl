@@ -25,7 +25,7 @@ unit_tests_using_ubuntu_packages:
         - wget -O- https://dl.bintray.com/rabbitmq/Keys/rabbitmq-release-signing-key.asc | apt-key add -
         - wget -O - http://repo.daedalus-project.io/repo.daedalus-project.io.gpg-key.pub | apt-key add -
         - apt-get update
-        - apt-get install -y rabbitmq-server libmoose-perl libmoosex-nonmoose-perl libmoosex-strictconstructor-perl libclass-factory-perl libxml-parser-perl  libmodule-pluginfinder-perl libnet-amqp-rabbitmq-perl libxml-libxml-perl libtest-exception-perl
+        - apt-get install -y rabbitmq-server libmoose-perl libmoosex-nonmoose-perl libmoosex-strictconstructor-perl libclass-factory-perl libxml-parser-perl  libmodule-pluginfinder-perl libnet-amqp-rabbitmq-perl libxml-libxml-perl libtest-exception-perl libxml-simpleobject-perl libstring-random-perl
         - service rabbitmq-server start
     script:
         - perl --version
