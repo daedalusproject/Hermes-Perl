@@ -22,6 +22,8 @@ unit_tests:
 
 run-build:
     stage: build
+    only:
+        - /^v-.*$/
     artifacts:
         paths:
             - build/*
