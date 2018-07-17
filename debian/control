@@ -1,0 +1,14 @@
+Source: libdaedalus-hermes-perl
+Section: perl
+Priority: optional
+Maintainer: Álvaro Castellano Vela <alvaro.castellano.vela@gmail.com>
+Build-Depends: debhelper (>= 10)
+Build-Depends-Indep: perl, libmoose-perl, libmoosex-nonmoose-perl, libmoosex-strictconstructor-perl, libclass-factory-perl, libxml-parser-perl, libmodule-pluginfinder-perl, libnet-amqp-rabbitmq-perl, libxml-libxml-perl, libtest-exception-perl, libxml-simpleobject-perl, libstring-random-perl, libtest-most-perl
+Standards-Version: 4.1.3
+Homepage: https://git.daedalus-project.io/daedalusproject/Iris-Perl
+
+Package: libdaedalus-hermes-perl
+Architecture: all
+Depends: libmoose-perl, libmoosex-nonmoose-perl, libmoosex-strictconstructor-perl, libclass-factory-perl, libxml-parser-perl, libmodule-pluginfinder-perl, libnet-amqp-rabbitmq-perl, libxml-libxml-perl, libtest-exception-perl, libxml-simpleobject-perl, libstring-random-perl, ${misc:Depends}, ${perl:Depends}
+Description: Daedalus::Hermes
+  Service that provides communication between Daedalus Project services. Perl implementation.
