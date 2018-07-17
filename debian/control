@@ -3,7 +3,7 @@ Section: perl
 Priority: optional
 Maintainer: Álvaro Castellano Vela <alvaro.castellano.vela@gmail.com>
 Build-Depends: debhelper (>= 10)
-Build-Depends-Indep: pel, libmoose-perl, libmoosex-nonmoose-perl, libmoosex-strictconstructor-perl, libclass-factory-perl, libxml-parser-perl, libmodule-pluginfinder-perl, libnet-amqp-rabbitmq-perl, libxml-libxml-perl, libtest-exception-perl, libxml-simpleobject-perl, libstring-random-perl, libtest-most-perl
+Build-Depends-Indep: perl, libmoose-perl, libmoosex-nonmoose-perl, libmoosex-strictconstructor-perl, libclass-factory-perl, libxml-parser-perl, libmodule-pluginfinder-perl, libnet-amqp-rabbitmq-perl, libxml-libxml-perl, libtest-exception-perl, libxml-simpleobject-perl, libstring-random-perl, libtest-most-perl
 Standards-Version: 4.1.3
 Homepage: https://git.daedalus-project.io/daedalusproject/Iris-Perl
 
