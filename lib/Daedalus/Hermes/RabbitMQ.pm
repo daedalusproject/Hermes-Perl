@@ -112,7 +112,7 @@ sub BUILD {
     # Consume options
     # consumer_tag => $tag,    #absent by default
     my @allowed_consume_options =
-      ( 'no_local', 'no_ack', 'props', 'consumer_tag' );
+      ( 'no_local', 'no_ack', 'props', 'consumer_tag', 'exclusive' );
 
     # Default consume options
     #     no_local  -> default 0
