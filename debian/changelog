@@ -1,3 +1,9 @@
+libdaedalus-hermes-perl (0.02-1) unstable; urgency=low
+
+* Fix Consume Options erros.
+
+-- Álvaro Castellano Vela <alvaro.castellano.vela@gmail.com>  Tue, 23 Jul 2018 22:04:20 +0200
+
 libdaedalus-hermes-perl (0.01-1) unstable; urgency=low
 
 * Initial release.
