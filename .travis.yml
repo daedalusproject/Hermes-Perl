@@ -16,6 +16,3 @@ before_install:
     - docker run -d --hostname raabitmq --name rabbitmq -p 15672:15672 -p 4369:4369 -p 5671:5671 -p 5672:5672 rabbitmq:3.7.5
 
 script: perl Makefile.PL && make && mutator mutate lib/Daedalus/Hermes.pm && mutator mutate lib/Daedalus/Hermes/RabbitMQ.pm && make test && mutator test
-after_success:
-    - cover -test
-    - cover -report codecov
