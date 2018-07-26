@@ -18,7 +18,7 @@ unit_tests:
     script:
         - perl --version
         - cd t && cpanm --quiet --installdeps --notest . && cd ..
-        - perl Makefile.PL && make && mutator mutate lib/Daedalus/Hermes.pm && mutator mutate lib/Daedalus/Hermes/RabbitMQ.pm && make test && mutator test
+        - perl Makefile.PL && make && mutator mutate lib/Daedalus/Hermes.pm && make test && mutator test
 
 cover:
     stage: test
