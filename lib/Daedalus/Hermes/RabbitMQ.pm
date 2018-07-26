@@ -635,25 +635,23 @@ sub _receive {
     my $basic_qos_options = {};
     my $consume_options   = {};
 
-    my $send_ack = 0;
+    if ( $connection_data->{consume_options} ) {
+        $consume_options = $connection_data->{consume_options};
+    }
 
     if ( $connection_data->{basic_qos_options} ) {
-        my $basic_qos_options = $connection_data->{basic_qos_options};
+        $basic_qos_options = $connection_data->{basic_qos_options};
     }
 
     $mq->queue_declare( $channel, $purpose, $queue_options );
-
-    if ( $connection_data->{basic_qos_options} ) {
-        $mq->basic_qos( $channel, $basic_qos_options );
-    }
 
     $mq->consume( $channel, $purpose, $consume_options );
 
     my $received = $mq->recv(0);
 
-    #    if ($send_ack) {
-    #        $mq->ack( $channel, $received->{delivery_tag} );
-    #    }
+    if ( $consume_options->{no_ack} eq '0' ) {
+        $mq->ack( $channel, $received->{delivery_tag} );
+    }
 
     return $received;
 }
@@ -673,7 +671,6 @@ sub sendACK {
 
     my $connection_data = $self->_processConnectionData($queue_data);
 
-    #die Dumper($connection_data);
     my $channel = $connection_data->{channel};
 
     if ( $connection_data->{consume_options}->{no_ack} == 1 ) {
