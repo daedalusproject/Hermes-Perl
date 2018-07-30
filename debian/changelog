@@ -1,3 +1,9 @@
+libdaedalus-hermes-perl (0.04-1) unstable; urgency=low
+
+* Fix xml parser function privacy
+
+-- Álvaro Castellano Vela <alvaro.castellano.vela@gmail.com>  Mon, 30 Jul 2018 17:22:20 +0200
+
 libdaedalus-hermes-perl (0.03-1) unstable; urgency=low
 
 * Fix Queue Options Management
