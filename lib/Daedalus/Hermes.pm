@@ -210,7 +210,7 @@ Parses xml hermes config. Croak if config is not valid.
 
 =cut
 
-sub _parse_hermes_config {
+sub parse_hermes_config {
 
     my $hermes_config = {};
 

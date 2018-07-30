@@ -18,7 +18,7 @@ my $message = "Ground Control to Major Tom.";
 my $HERMES = Daedalus::Hermes->new('rabbitmq');
 
 my $hermes_config =
-  Daedalus::Hermes::_parse_hermes_config("t/files/hermesrabbit02.xml");
+  Daedalus::Hermes::parse_hermes_config("t/files/hermesrabbit02.xml");
 
 my $hermes = $HERMES->new( $hermes_config->{config}, );
 
